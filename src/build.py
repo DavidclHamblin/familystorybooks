@@ -9,7 +9,7 @@ from html import escape as e
 
 ROOT = Path(__file__).resolve().parent.parent
 DIST = ROOT / "dist"
-DOMAIN = "www.familiestorybooks.co.uk"
+DOMAIN = "www.familystorybooks.co.uk"
 SITE = f"https://{DOMAIN}"
 
 data = json.loads(subprocess.check_output(["node", "-e", """
@@ -58,7 +58,7 @@ def footer():
 <p class="small">Classic fairy tales, retold by us, with your family as the characters. Hardcover picture books for ages 3 to 7.</p></div>
 <div style="display:grid;gap:12px"><div class="foot-links">{links}<a href="index.html#faq">FAQ</a><a href="index.html#faq-privacy">Photo privacy</a><a href="mailto:{CFG["email"]}">Contact</a></div>
 <div class="foot-links"><a href="{CFG["boardBooks"]}">Family Board Books, for ages 0 to 4</a></div>
-<p class="small">&copy; <span data-year>2026</span> Family Storybooks &middot; familiestorybooks.co.uk &middot; part of the Family Presents group</p></div>
+<p class="small">&copy; <span data-year>2026</span> Family Storybooks &middot; familystorybooks.co.uk &middot; part of the Family Presents group</p></div>
 </div></footer>"""
 
 
