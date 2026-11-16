@@ -1,6 +1,6 @@
 # Family Storybooks
 
-Website for www.familystorybooks.co.uk: classic fairy tales retold with your family as the characters. Part of the Family Presents group, sister site to Family Board Books (DavidclHamblin/familyboardbooks), and built on the same design system.
+Website for www.familiestorybooks.co.uk: classic fairy tales retold with your family as the characters. Part of the Family Presents group, sister site to Family Board Books (DavidclHamblin/familyboardbooks), and built on the same design system.
 
 - `assets/js/data.js`  stories, roles and settings (the one source of truth)
 - `assets/css/site.css`  styles, shared with Family Board Books plus storybook additions

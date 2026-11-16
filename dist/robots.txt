@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://www.familystorybooks.co.uk/sitemap.xml
+Sitemap: https://www.familiestorybooks.co.uk/sitemap.xml

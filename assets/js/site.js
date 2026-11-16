@@ -57,7 +57,7 @@
       _subject: "Family Storybooks waitlist: " + (data.story || ""),
       _template: "table",
       _replyto: data.email,
-      site: "familystorybooks.co.uk"
+      site: "familiestorybooks.co.uk"
     }, data);
     return fetch(F.config.formEndpoint, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(body) })
       .then(function (r) { return r.ok ? r.json().then(function (j) { return String(j.success) === "true"; }, function () { return true; }) : false; })
