@@ -37,8 +37,10 @@ FST.stories = {
   redhood: {
     slug: "little-red-riding-hood", name: "Little Red Riding Hood", short: "Little Red", color: "red", ready: true,
     /* Our own stand-in characters (hero, mum, grandma, helper) and the villain, drawn by the cartoon service in the
-       book's painted style. A part with no family photo uses its stand-in. Files: <art><key>.webp */
+       book's painted style. A part with no family photo uses its stand-in. Files: <art><key>.webp
+       Example pictures for each spread (painted with the stand-ins): <art>s<n>.webp. hero: the spread shown at the top of the page. */
     art: "assets/img/redhood/",
+    hero: 9,
     line: "A walk in the woods, a very silly Wolf, and a Grandma who's nobody's fool.",
     blurb: "Little Red sets off through the forest with a basket of honey buns for Grandma. The Wolf has a plan, but Grandma has a rolling pin. Our gentle retelling: nobody gets eaten, and the Wolf runs off over the hill.",
     spreads: 12,
@@ -85,7 +87,6 @@ FST.stories = {
       { side: "right", scene: "kitchen", pic: "{grandma}, {helper} and Little Red share honey buns and soup",
         text: "Then {grandma}, {helper} and Little Red sat down together for honey buns and soup.\n“Next time,” said Little Red, “I'll stay on the path.”\n“And I'll keep my rolling pin handy,” laughed {grandma}.\nThe End." }
     ],
-    sample: "Grandma peeped out of the window and saw a long grey tail. <b>“A wolf in a hurry,”</b> she said, and picked up her rolling pin."
   },
   goldilocks: {
     slug: "goldilocks", name: "Goldilocks and the Three Bears", short: "Goldilocks", color: "sun",

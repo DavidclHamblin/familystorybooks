@@ -3,7 +3,7 @@
 python3 src/build.py  ->  dist/  (the real site, for GitHub Pages)
 Story data lives in assets/js/data.js; this script reads it with node so there is one source of truth.
 """
-import json, shutil, subprocess
+import json, re, shutil, subprocess
 from pathlib import Path
 from html import escape as e
 
@@ -152,7 +152,7 @@ def look_inside(k):
     s = STORIES[k]
     names = "".join(f'<label class="field"><span>{e(r["name"])}</span><input type="text" data-name="{r["key"]}" maxlength="24" placeholder="e.g. {e(r["example"])}"></label>' for r in s["roles"])
     return f"""<section id="look-inside" class="section" style="--bc:var(--red);padding-top:24px"><div class="wrap">
-<div class="sec-head"><p class="eyebrow">Look inside</p><h2>Flick through the story</h2><p class="lede">Read every page of {e(s["name"])} with your own family's names. The pictures here are simple stand-ins: in your book, every page is painted with your family as the characters.</p></div>
+<div class="sec-head"><p class="eyebrow">Look inside</p><h2>Flick through the story</h2><p class="lede">Read every page of {e(s["name"])} with your own family's names. The pictures show our own stand-in family; in your book, every page is painted with your family as the characters.</p></div>
 <div class="bv" data-book="{k}" tabindex="-1">
 <details class="bv-names"><summary>Try it with your names</summary><div class="bv-name-grid">{names}</div></details>
 <div class="bv-stage" aria-live="polite"></div>
@@ -187,10 +187,16 @@ def maker(k):
 
 
 def spread():
+    """A real page from the book, with the example names and its example picture."""
     s = STORIES["redhood"]
-    return f"""<div class="spread" role="img" aria-label="An example page from Little Red Riding Hood">
-<div class="leaf"><p class="kicker">Little Red Riding Hood &middot; page 6</p><p class="story-text">{s["sample"]}</p></div>
-<div class="leaf art">{FOREST}</div></div>"""
+    n = s.get("hero", 9)
+    pg = s["pages"][n - 1]
+    names = {r["key"]: r["example"] for r in s["roles"]}
+    fill = lambda t: re.sub(r"\{(\w+)\}", lambda m: "<b>" + e(names.get(m.group(1), "")) + "</b>", e(t, quote=False))
+    text = "".join(f"<p>{fill(x)}</p>" for x in pg["text"].split("\n"))
+    return f"""<figure class="hero-spread"><div class="bv-page bv-spread side-{pg["side"]}" role="img" aria-label="Spread {n} of {e(s["name"])}: {e(re.sub(r"[{}]", "", pg["pic"]))}">
+<div class="bv-pic"><img src="{s["art"]}s{n}.webp" alt=""></div><div class="bv-text">{text}</div></div>
+<figcaption class="small">Spread {n} of {e(s["name"])}, with our stand-in family. Yours is painted with your own.</figcaption></figure>"""
 
 
 def meet(story):
