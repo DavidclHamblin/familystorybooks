@@ -401,3 +401,9 @@ textarea { min-height: 90px; resize: vertical; }
 .mk-msg { font-weight: 600; min-height: 1.4em; }
 @media (max-width: 860px) { .mk-cards, .guide { grid-template-columns: 1fr; } }
 @media (max-width: 460px) { .mk-card { grid-template-columns: 104px 1fr; gap: 14px; } }
+
+.bv-cast figure.standin img { opacity: .92; }
+.bv-wolf img { width: 100%; height: auto; mix-blend-mode: multiply; }
+.mk-pic.standin img { opacity: .55; filter: saturate(.7); }
+.mk-tag { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); white-space: nowrap; font: 700 11px/1 var(--body); letter-spacing: .06em; text-transform: uppercase; background: var(--surface); color: var(--muted); border-radius: 999px; padding: 6px 9px; border: 1px solid var(--line); }
+.meet figure img { width: 100%; max-width: 140px; aspect-ratio: 3 / 4; object-fit: contain; background: #fff; border-radius: 10px; }

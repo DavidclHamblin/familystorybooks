@@ -172,7 +172,7 @@ def maker(k):
     good = "".join(f"<li>{e(x)}</li>" for x in GUIDE_GOOD)
     bad = "".join(f"<li>{e(x)}</li>" for x in GUIDE_BAD)
     return f"""<section id="characters" class="section" style="--bc:var(--red);padding-top:0"><div class="wrap">
-<div class="sec-head"><p class="eyebrow">Free preview</p><h2>Meet your characters</h2><p class="lede">Add a photo of each person and we'll draw them in costume for the book's opening page, free. Only the characters page is drawn now; every other page is painted from these characters after you order.</p></div>
+<div class="sec-head"><p class="eyebrow">Free preview</p><h2>Meet your characters</h2><p class="lede">Add a photo of each person and we'll draw them in costume for the book's opening page, free. Only the characters page is drawn now; every other page is painted from these characters after you order. No photo for a part? We'll use our own stand-in character for it, painted in the same style.</p></div>
 <div class="mk" data-maker>
 <div class="guide">
 <div class="guide-col good"><h3>Photos that work best</h3><ul class="ticks">{good}</ul></div>
@@ -194,7 +194,11 @@ def spread():
 
 
 def meet(story):
-    figs = "".join(f'<figure>{CAST_ART[i % len(CAST_ART)]}<figcaption>{e(r["name"])}<span>played by {e(r["who"].split(",")[0].split(" or ")[0].replace("Your child", "your child"))}</span></figcaption></figure>' for i, r in enumerate(story["roles"]))
+    def art(i, r):
+        if story.get("art"):
+            return f'<img src="{story["art"]}{r["key"]}.webp" alt="" loading="lazy">'
+        return CAST_ART[i % len(CAST_ART)]
+    figs = "".join(f'<figure>{art(i, r)}<figcaption>{e(r["name"])}<span>played by {e(r["who"].split(",")[0].split(" or ")[0].replace("Your child", "your child"))}</span></figcaption></figure>' for i, r in enumerate(story["roles"]))
     return f'<div class="meet" role="img" aria-label="Example Meet the characters page"><h3>Meet the characters</h3>{figs}</div>'
 
 

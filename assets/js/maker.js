@@ -127,8 +127,9 @@
     roles.forEach(function (r) {
       var k = r.key, card = cards.querySelector('[data-role="' + k + '"]'), pic = card.querySelector(".mk-pic"), st = card.querySelector(".mk-state");
       var src = cast.toons[k] || previews[k];
-      pic.innerHTML = src ? '<img src="' + src + '" alt="">' : '<span class="mk-empty">No photo yet</span>';
-      pic.className = "mk-pic" + (cast.toons[k] ? " drawn" : previews[k] ? " photo" : "") + (busy[k] ? " busy" : "");
+      pic.innerHTML = src ? '<img src="' + src + '" alt="">'
+        : S.art ? '<img src="' + S.art + k + '.webp" alt=""><span class="mk-tag">Our stand-in</span>' : '<span class="mk-empty">No photo yet</span>';
+      pic.className = "mk-pic" + (cast.toons[k] ? " drawn" : previews[k] ? " photo" : S.art ? " drawn standin" : "") + (busy[k] ? " busy" : "");
       card.querySelector(".mk-where").hidden = !files[k];
       card.querySelector(".mk-redo").hidden = !cast.toons[k] || busy[k] || !!files[k];
       card.querySelector(".mk-file span").textContent = cast.toons[k] || files[k] ? "Use a different photo" : "Choose a photo";
