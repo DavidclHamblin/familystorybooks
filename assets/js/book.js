@@ -44,9 +44,12 @@
 
   function castFigure(r, i) {
     var img = cast.toons[r.key];
-    var art = img ? '<img src="' + img + '" alt="' + esc(cast.name(r.key)) + ' drawn as ' + esc(r.name) + '">' : tpl("cast-" + i);
-    return '<figure class="' + (img ? "drawn" : "") + '">' + art + "<figcaption>" + esc(cast.name(r.key)) + "<span>as " + esc(r.name) + "</span></figcaption></figure>";
+    var art = img ? '<img src="' + img + '" alt="' + esc(cast.name(r.key)) + ' drawn as ' + esc(r.name) + '">'
+      : S.art ? '<img src="' + S.art + r.key + '.webp" alt="Our stand-in ' + esc(r.name) + '" loading="lazy">' : tpl("cast-" + i);
+    return '<figure class="drawn' + (img ? "" : " standin") + '">' + art + "<figcaption>" + esc(cast.name(r.key)) + "<span>as " + esc(r.name) + "</span></figcaption></figure>";
   }
+
+  function wolf() { return S.art ? '<img src="' + S.art + 'villain.webp" alt="The Wolf" loading="lazy">' : tpl("wolf-art"); }
 
   function render(i) {
     var pg = pages[i], html;
@@ -59,11 +62,11 @@
     } else if (pg.kind === "meet") {
       var anyDrawn = roles.some(function (r) { return cast.toons[r.key]; });
       html = '<div class="bv-page bv-meet"><h3>Meet the characters</h3><div class="bv-cast">' + roles.map(castFigure).join("") +
-        '<figure class="villain">' + tpl("wolf-art") + "<figcaption>The Wolf<span>our own character</span></figcaption></figure></div>" +
-        (anyDrawn ? "" : '<p class="bv-note">These are stand-ins. <a href="#characters">Add your photos</a> to see your own family here.</p>') + "</div>";
+        '<figure class="drawn villain">' + wolf() + "<figcaption>The Wolf<span>our own character</span></figcaption></figure></div>" +
+        (anyDrawn ? "" : '<p class="bv-note">These are our own stand-in characters. <a href="#characters">Add your photos</a> to see your family here.</p>') + "</div>";
     } else {
       var p = pg.p;
-      html = '<div class="bv-page bv-spread side-' + p.side + '"><div class="bv-pic">' + tpl("scene-" + p.scene) + (p.wolf ? '<div class="bv-wolf">' + tpl("wolf-art") + "</div>" : "") +
+      html = '<div class="bv-page bv-spread side-' + p.side + '"><div class="bv-pic">' + tpl("scene-" + p.scene) + (p.wolf ? '<div class="bv-wolf">' + wolf() + "</div>" : "") +
         '<p class="bv-cap"><span>Picture:</span> ' + cast.fill(p.pic, true) + "</p></div>" +
         '<div class="bv-text">' + p.text.split("\n").map(function (line) { return "<p>" + cast.fill(line) + "</p>"; }).join("") + "</div></div>";
     }

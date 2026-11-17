@@ -36,6 +36,9 @@ FST.order = ["redhood", "goldilocks", "pigs", "cinderella", "sleeping"];
 FST.stories = {
   redhood: {
     slug: "little-red-riding-hood", name: "Little Red Riding Hood", short: "Little Red", color: "red", ready: true,
+    /* Our own stand-in characters (hero, mum, grandma, helper) and the villain, drawn by the cartoon service in the
+       book's painted style. A part with no family photo uses its stand-in. Files: <art><key>.webp */
+    art: "assets/img/redhood/",
     line: "A walk in the woods, a very silly Wolf, and a Grandma who's nobody's fool.",
     blurb: "Little Red sets off through the forest with a basket of honey buns for Grandma. The Wolf has a plan, but Grandma has a rolling pin. Our gentle retelling: nobody gets eaten, and the Wolf runs off over the hill.",
     spreads: 12,
