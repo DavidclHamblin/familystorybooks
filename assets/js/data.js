@@ -7,7 +7,9 @@ FST.config = {
   formEndpoint: "https://formsubmit.co/ajax/hello@familyboardbooks.com",
   email: "hello@familyboardbooks.com",
   foundingDiscount: 15,
-  boardBooks: "https://www.familyboardbooks.com"
+  boardBooks: "https://www.familyboardbooks.com",
+  // Shared photo and cartoon service (the Family Board Books worker). Draws the "Meet the characters" page.
+  api: "https://familyboardbooks-api.silent-forest-c98a.workers.dev"
 };
 
 /* Shipping regions, the same as Family Board Books. Ordering is closed in both until checkout opens;
@@ -37,13 +39,49 @@ FST.stories = {
     line: "A walk in the woods, a very silly Wolf, and a Grandma who's nobody's fool.",
     blurb: "Little Red sets off through the forest with a basket of honey buns for Grandma. The Wolf has a plan, but Grandma has a rolling pin. Our gentle retelling: nobody gets eaten, and the Wolf runs off over the hill.",
     spreads: 12,
+    /* key: the role in the cartoon service (worker/src/stories.js in familyboardbooks).
+       example: the name used in the preview until the family types their own. */
     roles: [
-      { name: "Little Red", who: "Your child", line: "The hero, in a strawberry-red hooded cape with a basket for Grandma." },
-      { name: "Mum", who: "Mum, Dad or any grown-up", line: "Packs the basket and waves Little Red off at the cottage door." },
-      { name: "Grandma", who: "Grandma, Grandad or any grandparent", line: "Spots the Wolf at the window and springs the surprise." },
-      { name: "The woodcutter", who: "Dad, an uncle, a big brother or sister", line: "Strides in at just the right moment." }
+      { key: "hero", name: "Little Red", who: "Your child", example: "Amara", label: "Your child's name", required: true,
+        line: "The hero, in a strawberry-red hooded cape with a basket for Grandma." },
+      { key: "mum", name: "Mum", who: "Mum, Dad or any grown-up", example: "Mummy", label: "What your child calls them",
+        line: "Packs the basket and waves Little Red off at the cottage door." },
+      { key: "grandma", name: "Grandma", who: "Grandma, Grandad or any grandparent", example: "Granny", label: "What your child calls them",
+        line: "Spots the Wolf at the window and springs the surprise." },
+      { key: "helper", name: "The woodcutter", who: "Dad, an uncle, a big brother or sister", example: "Daddy", label: "What your child calls them",
+        line: "Strides in at just the right moment." }
     ],
     villain: { name: "The Wolf", line: "Our own comical, far-too-grinny Wolf. Silly rather than scary, and never a member of your family." },
+    title: "Little Red {hero}",
+    dedication: "For {hero}, with love from {grandma}",
+    /* The story, one entry per double-page spread. {hero}, {mum}, {grandma} and {helper} become the family's names.
+       side: where the words sit on the picture. scene: which backdrop the preview uses. pic: what the picture shows. */
+    pages: [
+      { side: "right", scene: "cottage", pic: "Little Red outside the cottage with the crooked chimney",
+        text: "At the edge of the Whispering Wood, in a cottage with a crooked chimney, lived {hero}.\n{hero} had a cape as red as a ripe strawberry, so everyone called {hero} Little Red." },
+      { side: "right", scene: "kitchen", pic: "{mum} hands Little Red the basket in the sunny kitchen",
+        text: "One sunny morning, {mum} packed a basket: warm honey buns, a jar of soup and a bunch of daisies.\n“{grandma} has a sniffly nose,” said {mum}. “Take this to her, straight down the path. No dawdling, and don't talk to strangers!”" },
+      { side: "left", scene: "wood", pic: "Little Red walks between the tall green trees",
+        text: "“Straight down the path!” said Little Red, and off went the red cape, tip-tap, tip-tap, between the tall green trees.\nThe birds sang hello. The squirrels waved their tails." },
+      { side: "left", scene: "wood", wolf: true, pic: "The Wolf peeks out from behind a mossy log",
+        text: "But behind a mossy log, two yellow eyes were watching.\n“Good morning, little one,” purred the Wolf, with a smile far too wide. “Where are you going with that delicious-smelling basket?”" },
+      { side: "right", scene: "glade", wolf: true, pic: "Little Red picks bluebells while the Wolf sneaks away",
+        text: "Little Red forgot all about strangers. “To {grandma}'s house, past the three tall pines!”\n“How lovely,” said the Wolf. “Why not pick some bluebells?” And while Little Red picked, the Wolf ran, swish!, the short way through the trees." },
+      { side: "right", scene: "cottage", wolf: true, pic: "{grandma} spots the Wolf's tail from the window",
+        text: "Knock, knock. “Who's there?” called {grandma}.\n“It's me, Little Red,” squeaked the Wolf in his very best little voice.\nBut {grandma} was nobody's fool. She peeked through the window, spotted a long grey tail, and hid in the wardrobe. She took her rolling pin with her." },
+      { side: "left", scene: "bedroom", wolf: true, pic: "The Wolf in bed, in a nightcap and round glasses",
+        text: "The Wolf crept in. He put on {grandma}'s spare nightcap and her round reading glasses, and hopped into bed.\n“Hee hee,” he chuckled. “Lunch will be here any minute.”" },
+      { side: "left", scene: "bedroom", wolf: true, pic: "Little Red, holding bluebells, looks at the bed",
+        text: "Little Red skipped up the path with a fistful of bluebells.\n“Hello, {grandma}! Oh… {grandma}, what big EARS you have!”\n“All the better to hear you with,” said a voice from the bed." },
+      { side: "right", scene: "bedroom", wolf: true, pic: "The Wolf grins to show his very big teeth",
+        text: "“{grandma}, what big EYES you have!”\n“All the better to see you with.”\n“And {grandma}… what big TEETH you have!”\n“All the better to…”" },
+      { side: "left", scene: "bedroom", wolf: true, pic: "{grandma} bursts out with the rolling pin and {helper} strides in",
+        text: "“STOP RIGHT THERE!”\nThe wardrobe burst open, and out came {grandma} with her rolling pin. In through the door came {helper}, who had been chopping wood nearby and had heard every word." },
+      { side: "right", scene: "hill", wolf: true, pic: "The Wolf runs over the hill while everyone waves",
+        text: "The Wolf leapt out of bed so fast that the nightcap flew one way and the glasses flew the other.\nHe ran out of the door, over the hill and far, far away, and he was never seen in the Whispering Wood again." },
+      { side: "right", scene: "kitchen", pic: "{grandma}, {helper} and Little Red share honey buns and soup",
+        text: "Then {grandma}, {helper} and Little Red sat down together for honey buns and soup.\n“Next time,” said Little Red, “I'll stay on the path.”\n“And I'll keep my rolling pin handy,” laughed {grandma}.\nThe End." }
+    ],
     sample: "Grandma peeped out of the window and saw a long grey tail. <b>“A wolf in a hurry,”</b> she said, and picked up her rolling pin."
   },
   goldilocks: {
