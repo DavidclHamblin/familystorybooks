@@ -154,7 +154,9 @@ def look_inside(k):
     return f"""<section id="look-inside" class="section" style="--bc:var(--red);padding-top:24px"><div class="wrap">
 <div class="sec-head"><p class="eyebrow">Look inside</p><h2>Flick through the story</h2><p class="lede">Read every page of {e(s["name"])} with your own family's names. The pictures show our own stand-in family; in your book, every page is painted with your family as the characters.</p></div>
 <div class="bv" data-book="{k}" tabindex="-1">
-<details class="bv-names"><summary>Try it with your names</summary><div class="bv-name-grid">{names}</div></details>
+<details class="bv-names"><summary>Try it with your names</summary><div class="bv-name-grid">{names}
+<label class="field"><span>{e(s["roles"][0]["name"])} is a</span><select data-name="pron"><option value="she">Girl (she)</option><option value="he">Boy (he)</option></select></label>
+<label class="field bv-ded-field"><span>Your dedication</span><textarea data-name="dedication" maxlength="160" rows="2" placeholder="e.g. For {e(s["roles"][0]["example"])}, with love from {e(s["roles"][2]["example"])}"></textarea></label></div></details>
 <div class="bv-stage" aria-live="polite"></div>
 <div class="bv-nav"><button class="arrow bv-prev" type="button" aria-label="Previous page">&larr;</button><p class="bv-count"></p><button class="arrow bv-next" type="button" aria-label="Next page">&rarr;</button></div>
 <div class="bv-dots" aria-label="Pages"></div>

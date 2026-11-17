@@ -20,8 +20,14 @@
     return n || (r ? r.example : "");
   };
   // Fill {hero}, {mum}... with names. Returns safe HTML; names are shown in bold.
+  // {she} and {her} follow the "Little Red is a girl / boy" choice.
+  var PRON = { she: { she: "she", her: "her" }, he: { she: "he", her: "his" } };
   cast.fill = function (text, plain) {
-    return esc(text).replace(/\{(\w+)\}/g, function (m, k) { var n = esc(cast.name(k)); return plain ? n : "<b>" + n + "</b>"; });
+    var pr = PRON[cast.names.pron] || PRON.she;
+    return esc(text).replace(/\{(\w+)\}/g, function (m, k) {
+      if (pr[k]) return pr[k];
+      var n = esc(cast.name(k)); return plain ? n : "<b>" + n + "</b>";
+    });
   };
 
   function syncInputs() {
@@ -32,7 +38,7 @@
   document.addEventListener("input", function (e) {
     var k = e.target.getAttribute && e.target.getAttribute("data-name");
     if (!k) return;
-    cast.names[k] = e.target.value.slice(0, 24);
+    cast.names[k] = e.target.value.slice(0, k === "dedication" ? 160 : 24);
     try { localStorage.setItem(NKEY, JSON.stringify(cast.names)); } catch (err) {}
     syncInputs(); cast.changed();
   });
@@ -54,11 +60,14 @@
   function render(i) {
     var pg = pages[i], html;
     if (pg.kind === "cover") {
-      html = '<div class="bv-page bv-cover"><div class="bv-cover-art">' + (F.motifs[key] || "") + "</div>" +
+      var heroArt = cast.toons.hero || (S.art ? S.art + "hero.webp" : "");
+      html = '<div class="bv-page bv-cover"><div class="bv-cover-art">' + (heroArt ? '<img src="' + heroArt + '" alt="">' : (F.motifs[key] || "")) + "</div>" +
         '<p class="bv-kicker">A Family Storybook</p><h3>' + cast.fill(S.title, true) + "</h3>" +
         '<p class="bv-sub">Starring ' + roles.map(function (r) { return esc(cast.name(r.key)); }).join(", ").replace(/, ([^,]*)$/, " and $1") + "</p></div>";
     } else if (pg.kind === "dedication") {
-      html = '<div class="bv-page bv-plain"><p class="bv-ded">' + cast.fill(S.dedication, true) + '</p><p class="bv-note">Your own message goes here.</p></div>';
+      var ded = (cast.names.dedication || "").trim();
+      html = '<div class="bv-page bv-plain"><p class="bv-ded">' + (ded ? esc(ded).replace(/\n/g, "<br>") : cast.fill(S.dedication, true)) + "</p>" +
+        (ded ? "" : '<p class="bv-note">Write your own message in “Try it with your names” above.</p>') + "</div>";
     } else if (pg.kind === "meet") {
       var anyDrawn = roles.some(function (r) { return cast.toons[r.key]; });
       html = '<div class="bv-page bv-meet"><h3>Meet the characters</h3><div class="bv-cast">' + roles.map(castFigure).join("") +
