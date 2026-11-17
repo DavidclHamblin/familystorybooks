@@ -66,8 +66,9 @@
         (anyDrawn ? "" : '<p class="bv-note">These are our own stand-in characters. <a href="#characters">Add your photos</a> to see your family here.</p>') + "</div>";
     } else {
       var p = pg.p;
-      html = '<div class="bv-page bv-spread side-' + p.side + '"><div class="bv-pic">' + tpl("scene-" + p.scene) + (p.wolf ? '<div class="bv-wolf">' + wolf() + "</div>" : "") +
-        '<p class="bv-cap"><span>Picture:</span> ' + cast.fill(p.pic, true) + "</p></div>" +
+      var pic = S.art ? '<img src="' + S.art + "s" + pg.n + '.webp" alt="' + cast.fill(p.pic, true) + '" loading="lazy">'
+        : tpl("scene-" + p.scene) + (p.wolf ? '<div class="bv-wolf">' + wolf() + "</div>" : "");
+      html = '<div class="bv-page bv-spread side-' + p.side + '"><div class="bv-pic">' + pic + "</div>" +
         '<div class="bv-text">' + p.text.split("\n").map(function (line) { return "<p>" + cast.fill(line) + "</p>"; }).join("") + "</div></div>";
     }
     return html;
