@@ -17,6 +17,12 @@ global.window = {}; require(process.argv[1]); console.log(JSON.stringify(window.
 """, str(ROOT / "assets/js/data.js")]))
 STORIES, ORDER, CFG, MOTIFS = data["stories"], data["order"], data["config"], data["motifs"]
 DISCOUNT = CFG["foundingDiscount"]
+REGIONS, PRICES, GBP = data["regions"], data["prices"], data["gbp"]
+
+
+def money(eur):
+    """A price shown in pounds by default; region.js switches it to euros for EU visitors."""
+    return f'<span class="money" data-eur="{eur}">\u00a3{GBP[str(eur)]}</span>'
 
 FONTS = "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Figtree:wght@400;500;600;700&family=Oswald:wght@600&display=swap"
 
@@ -46,9 +52,11 @@ def header(active=""):
         return f'<a href="{href}"{cur}>{label}</a>'
     return f"""<header class="site-head"><div class="wrap">
 <a class="logo" href="index.html" aria-label="Family Storybooks home">{LOGO}Family Storybooks</a>
-<nav class="nav" aria-label="Main">{a("index.html#stories", "Stories", "stories")}{a("index.html#how", "How it works", "how")}{a("index.html#faq", "FAQ", "faq")}</nav>
+<nav class="nav" aria-label="Main">{a("index.html#stories", "Stories", "stories")}{a("index.html#how", "How it works", "how")}{a("index.html#pricing", "Pricing", "pricing")}{a("index.html#faq", "FAQ", "faq")}</nav>
+<label class="region"><span class="sr-only">Deliver to</span><select class="region-select" aria-label="Deliver to">{''.join(f'<option value="{k}">{e(r["label"])}</option>' for k, r in REGIONS.items())}</select></label>
 <a class="btn btn-sm red" href="index.html#join">Join the list</a>
-</div></header>"""
+</div></header>
+<p class="region-bar" id="region-bar" role="status" hidden></p>"""
 
 
 def footer():
@@ -76,6 +84,7 @@ def page(title, desc, path, body, active=""):
 </main>
 {footer()}
 <script src="assets/js/data.js"></script>
+<script src="assets/js/region.js"></script>
 <script src="assets/js/site.js"></script>
 </body>
 </html>
@@ -158,7 +167,7 @@ FAQ = [
     ("Are these the Disney versions?", "No. We write our own gentle retellings of the traditional tales, from the Brothers Grimm, Charles Perrault and Hans Christian Andersen, with our own pictures. In our Little Red Riding Hood, nobody gets eaten and Grandma outsmarts the Wolf."),
     ("What age are the books for?", "About 3 to 7. The stories are written to be read aloud, with a rhythm that's fun for grown-ups too. For babies and toddlers, see our sister site Family Board Books."),
     ("What will the book be like?", "A hardcover picture book of about 24 to 32 pages, printed in full colour on quality paper. We'll confirm the exact size, page count and price before ordering opens."),
-    ("How much will it cost?", f"We'll announce prices when ordering opens. Founding families on our list get {DISCOUNT}% off their first book."),
+    ("How much will it cost?", f"Our launch price is \u00a3{GBP[str(PRICES['book']['price'])]} (\u20ac{PRICES['book']['price']}) for a hardcover storybook, and \u00a3{GBP[str(PRICES['copy']['price'])]} (\u20ac{PRICES['copy']['price']}) for each extra copy. We'll confirm prices before ordering opens, and founding families on our list get {DISCOUNT}% off their first book.", "faq-price"),
     ("Where are my photos stored?", "In private, encrypted storage in the European Union, in Cloudflare's EU data centres. Your photos are never sent by email or kept in our shop system. Before a photo leaves your phone or computer, we shrink it and remove hidden details such as where it was taken.", "faq-privacy"),
     ("Who can see my photos?", "Only our automated system. Each book has its own secret key, and nobody on our team looks at your photos unless you ask us for help. To draw the characters, your photos are sent to our AI image provider under business terms that don't allow it to keep them or use them for training. Our printer only receives the finished print file."),
     ("How long do you keep my photos?", "Free previews are deleted after 14 days if you don't order. Original photos are deleted once your book is printed. Pictures and the print file are deleted 30 days after delivery, unless you choose to keep them for reorders. You can delete everything yourself at any time. We never use your photos for advertising or to train AI."),
@@ -168,6 +177,23 @@ FAQ = [
 
 def faq_html():
     return "".join(f'<details{" id=" + chr(34) + q[2] + chr(34) if len(q) > 2 else ""}><summary>{e(q[0])}</summary><p>{e(q[1])}</p></details>' for q in FAQ)
+
+
+def pricing(cta_href="#join"):
+    b, c, g = PRICES["book"], PRICES["copy"], PRICES["giftbox"]
+    return f"""<section id="pricing" class="section" style="--bc:var(--red);padding-top:0"><div class="wrap">
+<div class="sec-head"><p class="eyebrow">Pricing</p><h2>Launch prices</h2><p class="lede">One simple price for every story. Founding families on our list get {DISCOUNT}% off their first book.</p></div>
+<div class="editions">
+<div class="edition featured"><span class="badge">Launch price</span><h3>{e(b["name"])}</h3><p class="muted">{e(b["pages"])}</p><p class="amt">{money(b["price"])}</p><p class="muted">{e(b["detail"])}</p><a class="btn red" href="{cta_href}">Join the list for {DISCOUNT}% off</a></div>
+<div class="edition"><h3>{e(c["name"])}</h3><p class="muted">{e(c["pages"])}</p><p class="amt">{money(c["price"])} <small>each</small></p><p class="muted">{e(c["detail"])}</p></div>
+</div>
+<div class="opts">
+<div class="opt"><h3>Free preview</h3><p>See your family drawn as characters before you pay.</p></div>
+<div class="opt"><h3>Gift box +{money(g["price"])}</h3><p>A keepsake box with a ribbon, ready to give.</p></div>
+<div class="opt"><h3>Delivery</h3><p>To the UK and Europe. Delivery costs are shown at checkout.</p></div>
+</div>
+<p class="note">Launch prices. We confirm final prices before ordering opens.</p>
+</div></section>"""
 
 
 # ---------- Home ----------
@@ -213,6 +239,8 @@ def home():
 <div class="why-item"><h3>A keepsake</h3><p>A hardcover picture book made to be read again and again, and kept for years.</p></div>
 </div></div></section>
 
+{pricing()}
+
 <section id="faq" class="section" style="padding-top:0"><div class="wrap">
 <div class="sec-head"><p class="eyebrow">Questions</p><h2>Good to know</h2></div>
 <div class="faq">{faq_html()}</div></div></section>
@@ -247,7 +275,7 @@ def story(k):
 <div class="bhero-copy">
 <h1>{e(s["name"])}</h1>
 <p class="lede">{e(s["blurb"])}</p>
-<div class="bhero-meta"><span class="chip">Ages 3 to 7</span><span class="chip">{s["spreads"]} spreads</span><span class="chip">Hardcover</span></div>
+<div class="bhero-meta"><span class="chip">Ages 3 to 7</span><span class="chip">{s["spreads"]} spreads</span><span class="chip">Hardcover</span><span class="chip">{money(PRICES["book"]["price"])}</span></div>
 <div class="hero-cta"><a class="btn red" href="#join">Join the list for {DISCOUNT}% off</a><a class="btn ghost" href="#cast">See the parts</a></div>
 </div>
 {spread()}
@@ -262,6 +290,8 @@ def story(k):
 <ul class="ticks">{"".join(f"<li>{e(x)}</li>" for x in inside)}</ul></div>
 {meet(s)}
 </div></section>
+
+{pricing()}
 
 {join_band(k)}
 

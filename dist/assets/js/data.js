@@ -10,6 +10,24 @@ FST.config = {
   boardBooks: "https://www.familyboardbooks.com"
 };
 
+/* Shipping regions, the same as Family Board Books. Ordering is closed in both until checkout opens;
+   the UK also waits for UK VAT. "notice" shows as a bar under the header. */
+FST.regions = {
+  uk: { id: "uk", label: "UK · £", name: "United Kingdom", currency: "£", notice: "" },
+  eu: { id: "eu", label: "EU · €", name: "Europe", currency: "€", notice: "" }
+};
+
+/* Launch prices in euros. UK prices in pounds come from the fixed table FST.gbp, keyed by the euro price.
+   These are provisional until the printer quote is in. Keep them the same as the prices in Shopify. */
+FST.prices = {
+  book: { name: "Your storybook", price: 39, pages: "Hardcover, 12 illustrated spreads",
+          detail: "Your family as the characters, a “Meet the characters” page, your child's name on the cover and a dedication page." },
+  copy: { name: "Extra copy", price: 25, pages: "The same book again",
+          detail: "Ordered with your book, for grandparents, cousins and godparents." },
+  giftbox: { name: "Gift box", price: 5 }
+};
+FST.gbp = { 39: 34, 25: 22, 5: 4 };
+
 /* Stories. "ready" stories are written and illustrated; the rest are coming soon.
    Roles are the parts the family plays. Villains are always our own characters, never family. */
 FST.order = ["redhood", "goldilocks", "pigs", "cinderella", "sleeping"];
