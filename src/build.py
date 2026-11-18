@@ -174,7 +174,7 @@ def maker(k):
     good = "".join(f"<li>{e(x)}</li>" for x in GUIDE_GOOD)
     bad = "".join(f"<li>{e(x)}</li>" for x in GUIDE_BAD)
     return f"""<section id="characters" class="section" style="--bc:var(--red);padding-top:0"><div class="wrap">
-<div class="sec-head"><p class="eyebrow">Free preview</p><h2>Meet your characters</h2><p class="lede">Add a photo of each person and we'll draw them in costume for the book's opening page, free. Only the characters page is drawn now; every other page is painted from these characters after you order. No photo for a part? We'll use our own stand-in character for it, painted in the same style.</p></div>
+<div class="sec-head"><p class="eyebrow">Free preview</p><h2>Meet your characters</h2><p class="lede">Add a photo of each person and we'll draw them in costume for the book's opening page, free. Then paint two story pages with them, to see your family in the story. Every other page is painted from these characters after you order. No photo for a part? We'll use our own stand-in character for it, painted in the same style.</p></div>
 <div class="mk" data-maker>
 <div class="guide">
 <div class="guide-col good"><h3>Photos that work best</h3><ul class="ticks">{good}</ul></div>
@@ -183,7 +183,7 @@ def maker(k):
 </div>
 <div class="mk-cards"></div>
 <label class="check mk-consent"><input type="checkbox" id="mk-consent"><span>I'm the parent or guardian, or I have permission from the people in these photos to use them.</span></label>
-<div class="mk-actions"><button type="button" class="btn red mk-go">Draw my characters</button><button type="button" class="btn ghost btn-sm mk-delete">Delete my photos</button><p class="mk-left small"></p></div>
+<div class="mk-actions"><button type="button" class="btn red mk-go">Draw my characters</button><button type="button" class="btn red mk-scenes" hidden>Paint story pages with my family</button><button type="button" class="btn ghost btn-sm mk-delete">Delete my photos</button><p class="mk-left small"></p></div>
 <p class="mk-msg" role="status" aria-live="polite"></p>
 </div></div></section>"""
 
@@ -236,7 +236,7 @@ def join_band(selected="redhood"):
 FAQ = [
     ("How do you put my family in the story?", "You add an ordinary photo of each person and choose who plays which part. We first draw each of them as a story character in costume, in our hand-painted picture-book style. You check and approve these characters, and every page of the book is then drawn from them, so everyone looks the same from the first page to the last."),
     ("What is the “Meet the characters” page?", "The first page of every book introduces the cast: each family member drawn in costume, with their name and the part they play. Children love finding everyone before the story starts."),
-    ("Can I see my book before I pay?", "Yes. On each story's page you can flick through every page of the story with your own family's names, and add photos to see your family drawn as characters on the “Meet the characters” page, free. After you order, a private link shows every page, you can ask for any picture to be drawn again, and nothing is printed until you approve it.", "faq-preview"),
+    ("Can I see my book before I pay?", "Yes. On each story's page you can flick through every page of the story with your own family's names, and add photos to see your family drawn as characters on the “Meet the characters” page and on two story pages, free. After you order, a private link shows every page, you can ask for any picture to be drawn again, and nothing is printed until you approve it.", "faq-preview"),
     ("Which photos work best?", "A recent, clear photo of each person in good daylight, facing the camera, with their face nice and big. Head and shoulders is ideal, and an ordinary phone photo is perfect. Avoid sunglasses, hats pulled low, heavy filters and faces far away. If someone is in a group photo, just tell us whether they're on the left, right or in the middle.", "faq-photos"),
     ("Does anyone in my family play the baddie?", "Never. Villains such as the Wolf are always our own illustrated characters. Your family always take the good parts: the hero, the helpers and the clever grandparents."),
     ("Are these the Disney versions?", "No. We write our own gentle retellings of the traditional tales, from the Brothers Grimm, Charles Perrault and Hans Christian Andersen, with our own pictures. In our Little Red Riding Hood, nobody gets eaten and Grandma outsmarts the Wolf."),

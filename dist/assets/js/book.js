@@ -74,8 +74,11 @@
         '<figure class="drawn villain">' + wolf() + "<figcaption>The Wolf<span>our own character</span></figcaption></figure></div>" +
         (anyDrawn ? "" : '<p class="bv-note">These are our own stand-in characters. <a href="#characters">Add your photos</a> to see your family here.</p>') + "</div>";
     } else {
-      var p = pg.p;
-      var pic = S.art ? '<img src="' + S.art + "s" + pg.n + '.webp" alt="' + cast.fill(p.pic, true) + '" loading="lazy">'
+      var p = pg.p, mine = cast.toons["s" + pg.n];
+      var family = roles.some(function (r) { return cast.toons[r.key]; });
+      var pic = mine ? '<img src="' + mine + '" alt="' + cast.fill(p.pic, true) + '"><span class="bv-tag mine">Painted with your family</span>'
+        : S.art ? '<img src="' + S.art + "s" + pg.n + '.webp" alt="' + cast.fill(p.pic, true) + '" loading="lazy">' +
+          (family ? '<span class="bv-tag">Our example family. Yours is painted on every page after you order.</span>' : "")
         : tpl("scene-" + p.scene) + (p.wolf ? '<div class="bv-wolf">' + wolf() + "</div>" : "");
       html = '<div class="bv-page bv-spread side-' + p.side + '"><div class="bv-pic">' + pic + "</div>" +
         '<div class="bv-text">' + p.text.split("\n").map(function (line) { return "<p>" + cast.fill(line) + "</p>"; }).join("") + "</div></div>";
@@ -111,7 +114,7 @@
     if (x0 === null) return; var dx = e.changedTouches[0].clientX - x0; x0 = null;
     if (Math.abs(dx) > 50) show(at + (dx < 0 ? 1 : -1), dx < 0 ? "fwd" : "back");
   });
-  cast.show = function (kind) { for (var i = 0; i < pages.length; i++) if (pages[i].kind === kind) return show(i); };
+  cast.show = function (kind, n) { for (var i = 0; i < pages.length; i++) if (pages[i].kind === kind && (n === undefined || pages[i].n === n)) return show(i); };
   cast.on(function () { show(at); });
   show(0);
 })();

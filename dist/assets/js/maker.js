@@ -55,7 +55,8 @@
       img.src = url;
     });
   }
-  function slot(k) { return "c-" + k; }
+  // Characters live in c-<role>; sample story pages in s<n> (kept in cast.toons under "s<n>").
+  function slot(k) { return /^s\d+$/.test(k) ? k : "c-" + k; }
   function fetchToon(d, k) {
     return req("GET", "/api/drafts/" + d.id + "/cartoons/" + slot(k), d).then(function (b) {
       if (cast.toons[k]) URL.revokeObjectURL(cast.toons[k]);
@@ -70,7 +71,7 @@
     left.textContent = "Free tries left: " + status.redosLeft + ".";
   }
   function draw(k, d, upload) {
-    busy[k] = true; delete errors[k]; paint();
+    busy[k] = true; delete errors[k]; staleSamples(k); paint();
     var step = upload ? prepare(files[k]).then(function (b) { return req("PUT", "/api/drafts/" + d.id + "/photos/" + slot(k), d, b, "image/jpeg"); }) : Promise.resolve();
     return step.then(function () {
       return req("POST", "/api/drafts/" + d.id + "/cartoons/" + slot(k), d, { story: key, where: where[k] || "" });
@@ -102,10 +103,55 @@
     }).then(function () {
       btn.disabled = false;
       var failed = roles.filter(function (r) { return errors[r.key]; });
-      if (!failed.length) { msg.textContent = "Here they are! Have a look at your characters page in the book above."; cast.show("meet"); }
+      if (!failed.length) { msg.textContent = "Here they are! Have a look at your characters page in the book above." + (samplePages().length ? " Next, you can paint story pages with them." : ""); cast.show("meet"); }
       else if (!/free/i.test(msg.textContent)) msg.textContent = "Some characters couldn't be drawn. You can try those again, or use a different photo.";
     }, function (e) { btn.disabled = false; msg.textContent = e.message; });
   }
+
+  // ---------- sample pages painted with the family ----------
+  // Two story pages are painted from the family's own characters before ordering, so they can see
+  // their family in the story. Only pages without the Wolf (our Wolf isn't in their draft), and only
+  // pages whose characters they have drawn. The rest of the book is painted after ordering.
+  var SAMPLES = 2, sampleBusy = false, sampleBtn = root.querySelector(".mk-scenes");
+  function castOf(n) { return (S.pages[n - 1].cast || []); }
+  function samplePages() {
+    var ok = [];
+    (S.samples || []).forEach(function (n) {
+      if (ok.length < SAMPLES && castOf(n).every(function (k) { return cast.toons[k]; })) ok.push(n);
+    });
+    return ok;
+  }
+  function staleSamples(k) {
+    // A character was redrawn or replaced: pages showing them are out of date.
+    Object.keys(cast.toons).forEach(function (s) {
+      if (/^s\d+$/.test(s) && castOf(+s.slice(1)).indexOf(k) >= 0) { URL.revokeObjectURL(cast.toons[s]); delete cast.toons[s]; }
+    });
+  }
+  function paintSamples() {
+    var d = saved(), want = samplePages();
+    if (!d || !want.length || sampleBusy) return;
+    sampleBusy = true; paintSampleBtn();
+    msg.textContent = "Painting " + (want.length > 1 ? want.length + " pages" : "a page") + " with your family. This takes about a minute…";
+    var failed = null;
+    Promise.all(want.map(function (n) {
+      return req("POST", "/api/drafts/" + d.id + "/cartoons/s" + n, d, { story: key }).then(function (j) {
+        status = j; return fetchToon(d, "s" + n);
+      }).catch(function (e) { failed = e; });
+    })).then(function () {
+      sampleBusy = false; showLeft(); paintSampleBtn(); cast.changed();
+      var done = want.filter(function (n) { return cast.toons["s" + n]; });
+      if (done.length) { msg.textContent = "Done! Look for “Painted with your family” in the book above."; cast.show("spread", done[0]); }
+      else msg.textContent = failed ? failed.message : "We couldn't paint those pages. Please try again.";
+    });
+  }
+  function paintSampleBtn() {
+    if (!sampleBtn) return;
+    var want = samplePages(), have = want.length && want.every(function (n) { return cast.toons["s" + n]; });
+    sampleBtn.hidden = !want.length || have || !saved();
+    sampleBtn.disabled = sampleBusy || roles.some(function (r) { return busy[r.key]; });
+    sampleBtn.textContent = sampleBusy ? "Painting…" : "Paint " + (want.length > 1 ? want.length + " story pages" : "a story page") + " with my family";
+  }
+  if (sampleBtn) sampleBtn.addEventListener("click", paintSamples);
 
   // ---------- the cards ----------
   var cards = root.querySelector(".mk-cards");
@@ -136,6 +182,7 @@
       st.textContent = busy[k] ? "Drawing " + cast.name(k) + "…" : errors[k] ? errors[k] : files[k] ? "Ready to draw." : cast.toons[k] ? "Drawn as " + r.name + "." : "";
       st.className = "mk-state" + (errors[k] ? " bad" : "");
     });
+    paintSampleBtn();
   }
   cards.addEventListener("change", function (e) {
     var k = e.target.getAttribute("data-file");
@@ -145,7 +192,7 @@
       files[k] = f; delete errors[k];
       if (previews[k]) URL.revokeObjectURL(previews[k]);
       previews[k] = URL.createObjectURL(f);  // shown only here, in this browser
-      if (cast.toons[k]) { URL.revokeObjectURL(cast.toons[k]); delete cast.toons[k]; cast.changed(); }
+      if (cast.toons[k]) { URL.revokeObjectURL(cast.toons[k]); delete cast.toons[k]; staleSamples(k); cast.changed(); }
       paint();
     }
     var w = e.target.getAttribute("data-where");
@@ -162,7 +209,8 @@
     var d = saved();
     var done = function () {
       forget(); status = null;
-      roles.forEach(function (r) { if (cast.toons[r.key]) URL.revokeObjectURL(cast.toons[r.key]); if (previews[r.key]) URL.revokeObjectURL(previews[r.key]); });
+      Object.keys(cast.toons).forEach(function (k) { URL.revokeObjectURL(cast.toons[k]); });
+      roles.forEach(function (r) { if (previews[r.key]) URL.revokeObjectURL(previews[r.key]); });
       cast.toons = {}; previews = {}; files = {}; errors = {};
       cards.querySelectorAll("input[type=file]").forEach(function (i) { i.value = ""; });
       paint(); showLeft(); cast.changed(); msg.textContent = "Deleted. Your photos and characters have been removed from our service.";
@@ -178,7 +226,8 @@
   if (d0 && API) {
     req("GET", "/api/drafts/" + d0.id, d0).then(function (st) {
       status = st; showLeft();
-      var ks = roles.map(function (r) { return r.key; }).filter(function (k) { return st.cartoons.indexOf(slot(k)) >= 0; });
+      var ks = roles.map(function (r) { return r.key; }).concat((S.samples || []).map(function (n) { return "s" + n; }))
+        .filter(function (k) { return st.cartoons.indexOf(slot(k)) >= 0; });
       return Promise.all(ks.map(function (k) { return fetchToon(d0, k).catch(function () {}); }));
     }).then(function () { paint(); cast.changed(); }, function (e) { if (e.status === 404 || e.status === 403) forget(); });
   }
