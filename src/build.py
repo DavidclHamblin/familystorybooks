@@ -190,7 +190,7 @@ def maker(k):
     good = "".join(f"<li>{e(x)}</li>" for x in GUIDE_GOOD)
     bad = "".join(f"<li>{e(x)}</li>" for x in GUIDE_BAD)
     return f"""<section id="characters" class="section" style="--bc:var(--red);padding-top:0"><div class="wrap">
-<div class="sec-head"><p class="eyebrow">Free preview</p><h2>Meet your characters</h2><p class="lede">Add a photo of each person and we'll draw them in costume for the book's opening page, free. Then paint two story pages with them, to see your family in the story. Every other page is painted from these characters after you order. No photo for a part? We'll use our own stand-in character for it, painted in the same style.</p></div>
+<div class="sec-head"><p class="eyebrow">Free preview</p><h2>Meet your characters</h2><p class="lede">Add a photo of each person and we'll draw them in costume for the book's opening page, free. Then we paint two story pages with them, so you can see your family in the story. Every other page is painted from these characters after you order. No photo for a part? We'll use our own stand-in character for it, painted in the same style.</p></div>
 <div class="mk" data-maker>
 <div class="guide">
 <div class="guide-col good"><h3>Photos that work best</h3><ul class="ticks">{good}</ul></div>
