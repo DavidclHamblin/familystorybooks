@@ -9,8 +9,20 @@ FST.config = {
   foundingDiscount: 15,
   boardBooks: "https://www.familyboardbooks.com",
   // Shared photo and cartoon service (the Family Board Books worker). Draws the "Meet the characters" page.
-  api: "https://familyboardbooks-api.silent-forest-c98a.workers.dev"
+  api: "https://familyboardbooks-api.silent-forest-c98a.workers.dev",
+  /* "My orders" page (account.html): Shopify customer accounts through the Customer Account API.
+     clientId comes from Shopify admin > Sales channels > Headless > Customer Account API (a public ID, not a secret).
+     Until it is filled in, the page says order tracking opens with ordering. */
+  accounts: { shop: "nuwppy-0s.myshopify.com", clientId: "", brand: "fst" }
 };
+
+/* Every Family Presents site sells from the same Shopify store, so orders are sorted into brands by SKU prefix. */
+FST.brands = [
+  { id: "fst", prefix: "FST-", name: "Family Storybooks", url: "https://www.familystorybooks.co.uk" },
+  { id: "fbb", prefix: "FBB-", name: "Family Board Books", url: "https://www.familyboardbooks.com" },
+  { id: "flr", prefix: "FLR-", name: "Family Learn to Read", url: "" },
+  { id: "fjg", prefix: "FJG-", name: "Family Jigsaws", url: "" }
+];
 
 /* Shipping regions, the same as Family Board Books. Ordering is closed in both until checkout opens;
    the UK also waits for UK VAT. "notice" shows as a bar under the header. */
