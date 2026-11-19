@@ -38,6 +38,13 @@ LOGO = """<svg class="logo-book" viewBox="0 0 32 32" aria-hidden="true"><path d=
 FAVICON = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M16 8C12 5 6 5 2 6V16C6 15 12 15 16 17.2Z" fill="#EE4B2B"/><path d="M16 8C20 5 26 5 30 6V16C26 15 20 15 16 17.2Z" fill="#FFC21A"/><path d="M2 17.4C6 16.4 12 16.4 16 18.6V28C12 25 6 25 2 26Z" fill="#16A6E3"/><path d="M30 17.4C26 16.4 20 16.4 16 18.6V28C20 25 26 25 30 26Z" fill="#1FB45A"/><path d="M16 8v20" stroke="#1E1A33" stroke-width="1.5"/></svg>"""
 
 
+def v(rel):
+    """Asset link with a short content hash, so browsers fetch a changed file straight away."""
+    import hashlib
+    h = hashlib.sha1((ROOT / "assets" / rel).read_bytes()).hexdigest()[:8]
+    return f"assets/{rel}?v={h}"
+
+
 def head(title, desc, path):
     return f"""<title>{e(title)}</title>
 <meta name="description" content="{e(desc)}">
@@ -50,7 +57,7 @@ def head(title, desc, path):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="{FONTS}">
-<link rel="stylesheet" href="assets/css/site.css">
+<link rel="stylesheet" href="{v("css/site.css")}">
 """
 
 
@@ -92,10 +99,10 @@ def page(title, desc, path, body, active="", scripts=()):
 {body}
 </main>
 {footer()}
-<script src="assets/js/data.js"></script>
-<script src="assets/js/region.js"></script>
-<script src="assets/js/site.js"></script>
-{"".join(f'<script src="assets/js/{x}"></script>' for x in scripts)}
+<script src="{v("js/data.js")}"></script>
+<script src="{v("js/region.js")}"></script>
+<script src="{v("js/site.js")}"></script>
+{"".join(f'<script src="{v("js/" + x)}"></script>' for x in scripts)}
 </body>
 </html>
 """
