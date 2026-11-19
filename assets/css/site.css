@@ -434,3 +434,9 @@ textarea { min-height: 90px; resize: vertical; }
 .side-right .bv-tag { left: 12px; }
 @media (max-width: 700px) { .bv-tag { max-width: none; left: 8px !important; right: 8px !important; bottom: 8px; text-align: center; font-size: .75rem; } }
 .mk-scenes { margin-left: 0; }
+/* Story text: one size on every page, scaled to the page (not the window), with a clear margin
+   on every side. Sized so the longest page still fits. */
+.bv-page { container-type: inline-size; }
+.bv-spread .bv-text, .hero-spread .bv-text { width: 34%; padding: 4.2cqw 3.4cqw; font-size: var(--story-size, 2.3cqw); line-height: 1.38; gap: .6em; align-content: center; }
+.side-right .bv-text { padding-right: 3.8cqw; } .side-left .bv-text { padding-left: 3.8cqw; }
+@media (max-width: 720px) { .bv-spread .bv-text, .hero-spread .bv-text { width: auto; padding: 20px 22px 24px; font-size: 19px; line-height: 1.45; } }
