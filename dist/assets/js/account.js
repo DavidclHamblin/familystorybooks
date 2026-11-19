@@ -113,8 +113,7 @@
   // ---------- Orders ----------
   var ORDERS = "query { customer { firstName emailAddress { emailAddress } orders(first: 30, sortKey: PROCESSED_AT, reverse: true) { nodes {" +
     " id name processedAt statusPageUrl financialStatus totalPrice { amount currencyCode }" +
-    " customAttributes { key value }" +
-    " lineItems(first: 20) { nodes { title quantity sku variantTitle } }" +
+    " lineItems(first: 20) { nodes { title quantity sku variantTitle customAttributes { key value } } }" +
     " fulfillments(first: 5) { nodes { status latestShipmentStatus createdAt trackingInformation { number url company } } }" +
     " } } } }";
 
@@ -158,7 +157,8 @@
 
   function orderCard(o) {
     var s = stage(o), refunded = o.financialStatus === "REFUNDED" || o.financialStatus === "VOIDED";
-    var attrs = {}; (o.customAttributes || []).forEach(function (a) { attrs[a.key] = a.value; });
+    // The private book link travels as a line-item property ("Your book link"); Shopify's customer API has no order attributes.
+    var attrs = {}; o.lineItems.nodes.forEach(function (l) { (l.customAttributes || []).forEach(function (a) { attrs[a.key] = a.value; }); });
     var link = attrs["Your book link"];
     var tracking = [];
     o.fulfillments.nodes.forEach(function (f) { (f.trackingInformation || []).forEach(function (t) { if (t.url || t.number) tracking.push(t); }); });
