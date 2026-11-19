@@ -32,6 +32,11 @@
   function endpoints() {
     var cached = store("-ep");
     if (cached) return Promise.resolve(cached);
+    if (A.shopId) {
+      var auth = "https://shopify.com/authentication/" + A.shopId;
+      return Promise.resolve({ auth: auth + "/oauth/authorize", token: auth + "/oauth/token", logout: auth + "/logout",
+        api: "https://shopify.com/" + A.shopId + "/account/customer/api/" + (A.apiVersion || "2025-07") + "/graphql" });
+    }
     var base = "https://" + A.shop;
     return Promise.all([
       fetch(base + "/.well-known/openid-configuration").then(function (r) { return r.json(); }),

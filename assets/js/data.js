@@ -13,7 +13,8 @@ FST.config = {
   /* "My orders" page (account.html): Shopify customer accounts through the Customer Account API.
      clientId comes from Shopify admin > Sales channels > Headless > Customer Account API (a public ID, not a secret).
      Until it is filled in, the page says order tracking opens with ordering. */
-  accounts: { shop: "nuwppy-0s.myshopify.com", clientId: "", brand: "fst" }
+  accounts: { shop: "nuwppy-0s.myshopify.com", shopId: "106338746711", apiVersion: "2025-07",
+              clientId: "86dee738-3dae-4025-9e56-952317f2dd25", brand: "fst" }
 };
 
 /* Every Family Presents site sells from the same Shopify store, so orders are sorted into brands by SKU prefix. */
