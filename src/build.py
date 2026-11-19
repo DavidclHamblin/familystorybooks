@@ -202,7 +202,15 @@ def spread(k="redhood"):
     n = s.get("hero", 9)
     pg = s["pages"][n - 1]
     names = {r["key"]: r["example"] for r in s["roles"]}
-    fill = lambda t: re.sub(r"\{(\w+)\}", lambda m: "<b>" + e(names.get(m.group(1), "")) + "</b>", e(t, quote=False))
+    pron = {"she": "she", "her": "her"}
+
+    def word(m):
+        k = m.group(1)
+        if k in pron:
+            w = pron[k]
+            return w.capitalize() if re.search(r"(^|[.!?…]\s+|“)$", m.string[:m.start()]) else w
+        return "<b>" + e(names.get(k, "")) + "</b>"
+    fill = lambda t: re.sub(r"\{(\w+)\}", word, e(t, quote=False))
     text = "".join(f"<p>{fill(x)}</p>" for x in pg["text"].split("\n"))
     return f"""<figure class="hero-spread"><div class="bv-page bv-spread side-{pg["side"]}" role="img" aria-label="Spread {n} of {e(s["name"])}: {e(re.sub(r"[{}]", "", pg["pic"]))}">
 <div class="bv-pic"><img src="{s["art"]}s{n}.webp" alt=""></div><div class="bv-text">{text}</div></div>

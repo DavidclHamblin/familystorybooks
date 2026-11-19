@@ -24,8 +24,9 @@
   var PRON = { she: { she: "she", her: "her" }, he: { she: "he", her: "his" } };
   cast.fill = function (text, plain) {
     var pr = PRON[cast.names.pron] || PRON.she;
-    return esc(text).replace(/\{(\w+)\}/g, function (m, k) {
-      if (pr[k]) return pr[k];
+    return esc(text).replace(/\{(\w+)\}/g, function (m, k, at, all) {
+      // A pronoun that starts a sentence gets a capital letter.
+      if (pr[k]) return /(^|[.!?…]\s+|“)$/.test(all.slice(0, at)) ? pr[k].charAt(0).toUpperCase() + pr[k].slice(1) : pr[k];
       var n = esc(cast.name(k)); return plain ? n : "<b>" + n + "</b>";
     });
   };
