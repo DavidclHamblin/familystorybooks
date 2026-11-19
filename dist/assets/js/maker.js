@@ -110,7 +110,7 @@
 
   // ---------- sample pages painted with the family ----------
   // Two story pages are painted from the family's own characters before ordering, so they can see
-  // their family in the story. Only pages without the Wolf (our Wolf isn't in their draft), and only
+  // their family in the story. Only pages without our own characters (the Wolf, the bears and so on aren't in their draft), and only
   // pages whose characters they have drawn. The rest of the book is painted after ordering.
   var SAMPLES = 2, sampleBusy = false, sampleBtn = root.querySelector(".mk-scenes");
   function castOf(n) { return (S.pages[n - 1].cast || []); }

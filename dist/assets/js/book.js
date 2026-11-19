@@ -24,8 +24,9 @@
   var PRON = { she: { she: "she", her: "her" }, he: { she: "he", her: "his" } };
   cast.fill = function (text, plain) {
     var pr = PRON[cast.names.pron] || PRON.she;
-    return esc(text).replace(/\{(\w+)\}/g, function (m, k) {
-      if (pr[k]) return pr[k];
+    return esc(text).replace(/\{(\w+)\}/g, function (m, k, at, all) {
+      // A pronoun that starts a sentence gets a capital letter.
+      if (pr[k]) return /(^|[.!?…]\s+|“)$/.test(all.slice(0, at)) ? pr[k].charAt(0).toUpperCase() + pr[k].slice(1) : pr[k];
       var n = esc(cast.name(k)); return plain ? n : "<b>" + n + "</b>";
     });
   };
@@ -55,7 +56,7 @@
     return '<figure class="drawn' + (img ? "" : " standin") + '">' + art + "<figcaption>" + esc(cast.name(r.key)) + "<span>as " + esc(r.name) + "</span></figcaption></figure>";
   }
 
-  function wolf() { return S.art ? '<img src="' + S.art + 'villain.webp" alt="The Wolf" loading="lazy">' : tpl("wolf-art"); }
+  function wolf() { return S.art ? '<img src="' + S.art + 'villain.webp" alt="' + esc(S.villain.name) + '" loading="lazy">' : tpl("wolf-art"); }
 
   function render(i) {
     var pg = pages[i], html;
@@ -71,7 +72,7 @@
     } else if (pg.kind === "meet") {
       var anyDrawn = roles.some(function (r) { return cast.toons[r.key]; });
       html = '<div class="bv-page bv-meet"><h3>Meet the characters</h3><div class="bv-cast">' + roles.map(castFigure).join("") +
-        '<figure class="drawn villain">' + wolf() + "<figcaption>The Wolf<span>our own character</span></figcaption></figure></div>" +
+        '<figure class="drawn villain">' + wolf() + "<figcaption>" + esc(S.villain.name) + "<span>our own " + (/ and |^The Three/.test(S.villain.name) ? "characters" : "character") + "</span></figcaption></figure></div>" +
         (anyDrawn ? "" : '<p class="bv-note">These are our own stand-in characters. <a href="#characters">Add your photos</a> to see your family here.</p>') + "</div>";
     } else {
       var p = pg.p, mine = cast.toons["s" + pg.n];
@@ -79,7 +80,7 @@
       var pic = mine ? '<img src="' + mine + '" alt="' + cast.fill(p.pic, true) + '"><span class="bv-tag mine">Painted with your family</span>'
         : S.art ? '<img src="' + S.art + "s" + pg.n + '.webp" alt="' + cast.fill(p.pic, true) + '" loading="lazy">' +
           (family ? '<span class="bv-tag">Our example family. Yours is painted on every page after you order.</span>' : "")
-        : tpl("scene-" + p.scene) + (p.wolf ? '<div class="bv-wolf">' + wolf() + "</div>" : "");
+        : tpl("scene-" + p.scene) + ((p.wolf || p.villain) ? '<div class="bv-wolf">' + wolf() + "</div>" : "");
       html = '<div class="bv-page bv-spread side-' + p.side + '"><div class="bv-pic">' + pic + "</div>" +
         '<div class="bv-text">' + p.text.split("\n").map(function (line) { return "<p>" + cast.fill(line) + "</p>"; }).join("") + "</div></div>";
     }
