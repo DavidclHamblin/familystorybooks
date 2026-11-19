@@ -16,6 +16,14 @@ data = json.loads(subprocess.check_output(["node", "-e", """
 global.window = {}; require(process.argv[1]); console.log(JSON.stringify(window.FST));
 """, str(ROOT / "assets/js/data.js")]))
 STORIES, ORDER, CFG, MOTIFS = data["stories"], data["order"], data["config"], data["motifs"]
+# A story goes live only once all its painted art is in place (stand-ins, our own characters and 12 example spreads).
+for _k, _s in STORIES.items():
+    if _s.get("ready") and _s.get("art"):
+        _need = [r["key"] for r in _s["roles"]] + ["villain"] + [f"s{n}" for n in range(1, len(_s["pages"]) + 1)]
+        _missing = [f for f in _need if not (ROOT / _s["art"] / (f + ".webp")).exists()]
+        if _missing:
+            _s["ready"] = False
+            print(f"{_k}: not live yet, missing {len(_missing)} pictures")
 DISCOUNT = CFG["foundingDiscount"]
 REGIONS, PRICES, GBP = data["regions"], data["prices"], data["gbp"]
 
@@ -188,9 +196,9 @@ def maker(k):
 </div></div></section>"""
 
 
-def spread():
+def spread(k="redhood"):
     """A real page from the book, with the example names and its example picture."""
-    s = STORIES["redhood"]
+    s = STORIES[k]
     n = s.get("hero", 9)
     pg = s["pages"][n - 1]
     names = {r["key"]: r["example"] for r in s["roles"]}
@@ -353,7 +361,7 @@ def story(k):
 <div class="bhero-meta"><span class="chip">Ages 3 to 7</span><span class="chip">{s["spreads"]} spreads</span><span class="chip">Hardcover</span><span class="chip">{money(PRICES["book"]["price"])}</span></div>
 <div class="hero-cta"><a class="btn red" href="#characters">Meet your characters, free</a><a class="btn ghost" href="#look-inside">Look inside</a></div>
 </div>
-{spread()}
+{spread(k)}
 </section>
 
 {look_inside(k)}
@@ -375,7 +383,7 @@ def story(k):
 {join_band(k)}
 
 <section class="section" style="padding-top:0"><div class="wrap">
-<div class="sec-head"><p class="eyebrow">More stories</p><h2>Coming soon</h2></div>
+<div class="sec-head"><p class="eyebrow">More stories</p><h2>{"Coming soon" if not any(STORIES[o].get("ready") for o in ORDER if o != k) else "More family stories"}</h2></div>
 <div class="shelf books">{others}</div></div></section>
 """
     return page(f"{s['name']}: a personalised storybook starring your family",
