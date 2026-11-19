@@ -62,6 +62,7 @@ def header(active=""):
 <a class="logo" href="index.html" aria-label="Family Storybooks home">{LOGO}Family Storybooks</a>
 <nav class="nav" aria-label="Main">{a("index.html#stories", "Stories", "stories")}{a("index.html#how", "How it works", "how")}{a("index.html#pricing", "Pricing", "pricing")}{a("index.html#faq", "FAQ", "faq")}</nav>
 <label class="region"><span class="sr-only">Deliver to</span><select class="region-select" aria-label="Deliver to">{''.join(f'<option value="{k}">{e(r["label"])}</option>' for k, r in REGIONS.items())}</select></label>
+<a class="acct-link" href="account.html"{' aria-current="page"' if active == "account" else ""}><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>My orders</span></a>
 <a class="btn btn-sm red" href="index.html#join">Join the list</a>
 </div></header>
 <p class="region-bar" id="region-bar" role="status" hidden></p>"""
@@ -72,7 +73,7 @@ def footer():
     return f"""<footer class="site-foot"><div class="wrap foot-grid">
 <div style="display:grid;gap:10px;max-width:380px"><a class="logo" href="index.html">{LOGO}Family Storybooks</a>
 <p class="small">Classic fairy tales, retold by us, with your family as the characters. Hardcover picture books for ages 3 to 7.</p></div>
-<div style="display:grid;gap:12px"><div class="foot-links">{links}<a href="index.html#faq">FAQ</a><a href="index.html#faq-privacy">Photo privacy</a><a href="mailto:{CFG["email"]}">Contact</a></div>
+<div style="display:grid;gap:12px"><div class="foot-links">{links}<a href="index.html#faq">FAQ</a><a href="index.html#faq-privacy">Photo privacy</a><a href="account.html">My orders</a><a href="mailto:{CFG["email"]}">Contact</a></div>
 <div class="foot-links"><a href="{CFG["boardBooks"]}">Family Board Books, for ages 0 to 4</a></div>
 <p class="small">&copy; <span data-year>2026</span> Family Storybooks &middot; familystorybooks.co.uk &middot; part of the Family Presents group</p></div>
 </div></footer>"""
@@ -398,12 +399,22 @@ def story(k):
                 f"{s['name']}, retold with your child and family as the characters. {s['line']}", f"{s['slug']}.html", body, "stories", ("book.js", "maker.js"))
 
 
+def account():
+    body = """<section class="section"><div class="wrap acct-wrap">
+<p class="eyebrow">Your account</p>
+<h1 class="acct-title">My orders</h1>
+<p class="muted">Follow your storybook from order to doorstep, and open your private link to see and approve every page.</p>
+<div id="account" class="acct" aria-live="polite" aria-busy="true"><p class="acct-wait">Loading…</p></div>
+</div></section>"""
+    return page("My orders | Family Storybooks", "Sign in to see your Family Storybooks orders, follow your parcel and approve your pages.", "account.html", body, "account", ("account.js",))
+
+
 def main():
     if DIST.exists():
         shutil.rmtree(DIST)
     shutil.copytree(ROOT / "assets", DIST / "assets")
     (DIST / "assets/favicon.svg").write_text(FAVICON)
-    pages = {"index.html": home()}
+    pages = {"index.html": home(), "account.html": account()}
     for k in ORDER:
         if STORIES[k].get("ready"):
             pages[f"{STORIES[k]['slug']}.html"] = story(k)
