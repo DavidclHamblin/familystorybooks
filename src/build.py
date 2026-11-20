@@ -204,6 +204,14 @@ def maker(k):
 </div></div></section>"""
 
 
+def order_box(k):
+    s = STORIES[k]
+    return f"""<section id="order" class="section" style="--bc:var(--red);padding-top:0"><div class="wrap">
+<div class="sec-head"><p class="eyebrow">Order</p><h2>Order your book</h2><p class="lede">Happy with your characters? Order {e(s["name"])} and we'll paint every page with your family. You check every page before anything is printed.</p></div>
+<div class="ord" data-order><p class="muted">Loading…</p></div>
+</div></section>"""
+
+
 def spread(k="redhood"):
     """A real page from the book, with the example names and its example picture."""
     s = STORIES[k]
@@ -388,6 +396,8 @@ def story(k):
 
 {maker(k)}
 
+{order_box(k)}
+
 <section class="section" style="--bc:var(--red);padding-top:0"><div class="wrap split-2">
 <div style="display:grid;gap:18px"><div class="sec-head" style="margin:0"><p class="eyebrow">What's inside</p><h2>Every copy has</h2></div>
 <ul class="ticks">{"".join(f"<li>{e(x)}</li>" for x in inside)}</ul></div>
@@ -403,7 +413,7 @@ def story(k):
 <div class="shelf books">{others}</div></div></section>
 """
     return page(f"{s['name']}: a personalised storybook starring your family",
-                f"{s['name']}, retold with your child and family as the characters. {s['line']}", f"{s['slug']}.html", body, "stories", ("book.js", "maker.js"))
+                f"{s['name']}, retold with your child and family as the characters. {s['line']}", f"{s['slug']}.html", body, "stories", ("book.js", "maker.js", "order.js"))
 
 
 def account():
@@ -414,6 +424,38 @@ def account():
 <div id="account" class="acct" aria-live="polite" aria-busy="true"><p class="acct-wait">Loading…</p></div>
 </div></section>"""
     return page("My orders | Family Storybooks", "Sign in to see your Family Storybooks orders, follow your parcel and approve your pages.", "account.html", body, "account", ("account.js",))
+
+
+def proof():
+    """The customer's private page for checking and approving their book (not indexed): see assets/js/proof.js."""
+    body = """<section class="section"><div class="wrap pf" id="proof" aria-live="polite"><p class="muted">Loading your book…</p></div></section>"""
+    html = page("Your proof | Family Storybooks", "Check every page of your storybook and approve it for printing.", "proof.html", body, "", ("proof.js",))
+    return html.replace("<meta charset=\"utf-8\">", "<meta charset=\"utf-8\">\n<meta name=\"robots\" content=\"noindex, nofollow\">\n<meta name=\"referrer\" content=\"no-referrer\">", 1)
+
+
+def print_page():
+    """Print files for Lulu (not linked from the site, not indexed): see assets/js/print.js."""
+    return f"""<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Print files | Family Storybooks</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="{FONTS}">
+<link rel="stylesheet" href="{v("css/print.css")}">
+</head>
+<body>
+<p class="status" id="status" role="status">Building the print file…</p>
+<div id="book"></div>
+<script src="{v("js/data.js")}"></script>
+<script src="{v("js/print.js")}"></script>
+</body>
+</html>
+"""
 
 
 def main():
@@ -427,6 +469,8 @@ def main():
             pages[f"{STORIES[k]['slug']}.html"] = story(k)
     for name, html in pages.items():
         (DIST / name).write_text(html)
+    (DIST / "print.html").write_text(print_page())  # kept out of the sitemap
+    (DIST / "proof.html").write_text(proof())  # private, kept out of the sitemap
     (DIST / "CNAME").write_text(DOMAIN + "\n")
     (DIST / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {SITE}/sitemap.xml\n")
     urls = "".join(f"<url><loc>{SITE}/{'' if n == 'index.html' else n}</loc></url>" for n in pages)

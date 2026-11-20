@@ -13,6 +13,14 @@ FST.config = {
   /* "My orders" page (account.html): Shopify customer accounts through the Customer Account API.
      clientId comes from Shopify admin > Sales channels > Headless > Customer Account API (a public ID, not a secret).
      Until it is filled in, the page says order tracking opens with ordering. */
+  /* Checkout: the same Shopify store and public Storefront token as Family Board Books (Headless channel).
+     One product, handle "family-storybook", with two variants: SKU FST-BOOK (the book) and FST-COPY (an extra copy).
+     The story and names travel on the order line. Keep checkoutLive false until David opens ordering;
+     add #shoptest to a story page's address to try checkout before then. */
+  shopify: { domain: "nuwppy-0s.myshopify.com", token: "8f6930448d2a7ff75a544f49cb66e124", apiVersion: "2025-07",
+             checkoutLive: false, handle: "family-storybook", maxCopies: 5 },
+  // The customer's private page for checking and approving every page (proof.html?d=<draft>#<token>).
+  site: "https://www.familystorybooks.co.uk",
   accounts: { shop: "nuwppy-0s.myshopify.com", shopId: "106338746711", apiVersion: "2025-07",
               clientId: "86dee738-3dae-4025-9e56-952317f2dd25", brand: "fst" }
 };
