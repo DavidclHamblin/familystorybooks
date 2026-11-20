@@ -470,3 +470,37 @@ textarea { min-height: 90px; resize: vertical; }
 @media (max-width: 420px) { .site-head .wrap { gap: 8px; } .site-head .btn { padding: 9px 12px; font-size: 14px; } .site-head .region-select { padding: 8px 22px 8px 9px; font-size: 13px; background-position: right 8px center; } }
 @media (max-width: 380px) { .site-head .logo { font-size: 16px; gap: 6px; } .site-head .logo svg { width: 24px; height: auto; } .site-head .btn { padding: 9px 10px; } }
 @media (max-width: 345px) { .site-head .acct-link { display: none; } }
+
+/* ---------- ordering (story pages) ---------- */
+.ord { display: grid; gap: 16px; max-width: 640px; padding: 22px; border-radius: var(--r); background: var(--surface); border: 1px solid var(--line); }
+.ord-sum { display: grid; gap: 8px; margin: 0; }
+.ord-sum > div { display: grid; grid-template-columns: 140px 1fr; gap: 12px; }
+.ord-sum dt { font-weight: 700; } .ord-sum dd { margin: 0; overflow-wrap: anywhere; }
+.ord-total { font-size: 18px; margin: 0; } .ord-total b { font-size: 22px; }
+.ord-msg { margin: 0; font-weight: 600; min-height: 1.4em; }
+.ord-closed { display: grid; gap: 12px; justify-items: start; }
+.ord-closed h3 { margin: 0; }
+@media (max-width: 560px) { .ord-sum > div { grid-template-columns: 1fr; gap: 2px; } }
+
+/* ---------- proof page ---------- */
+.pf { display: grid; gap: 28px; }
+.pf-head { display: grid; gap: 8px; } .pf-head h1 { margin: 0; }
+.pf-box { display: grid; gap: 12px; max-width: 620px; }
+.pf-bar { display: grid; gap: 10px; padding: 16px 18px; border-radius: var(--r); background: var(--surface); border: 1px solid var(--line); }
+.pf-bar p { margin: 0; } .pf-bar.ok { border-color: #1FB45A; }
+.pf-meter { height: 10px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.pf-meter i { display: block; height: 100%; background: var(--red); transition: width .4s ease; }
+.pf-spin { display: inline-block; width: 14px; height: 14px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; vertical-align: -2px; margin-right: 6px; animation: pfspin 1s linear infinite; }
+@keyframes pfspin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .pf-spin { animation: none; } }
+.pf-cast { display: grid; gap: 14px; }
+.pf-cast h2, .pf-approve h2 { margin: 0; }
+.pf-ded { margin: 0; }
+.pf-pages { display: grid; gap: 26px; }
+.pf-spread { margin: 0; display: grid; gap: 8px; }
+.pf-spread figcaption { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; font-weight: 600; color: var(--muted); }
+.pf-wait { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; padding: 16px; background: var(--surface-2); color: var(--muted); font-weight: 600; }
+.pf-wait.bad { color: #B3261E; }
+.pf-approve { display: grid; gap: 14px; justify-items: start; padding: 22px; border-radius: var(--r); background: var(--surface); border: 1px solid var(--line); }
+.pf-msg { margin: 0; font-weight: 600; }
+.pf-printing { margin: 0; } .pf-printing a { margin-left: 6px; }
