@@ -43,10 +43,16 @@ html, body { margin: 0; padding: 0; background: #ddd; color: var(--ink); -webkit
 /* A spread is one picture across two pages (17.25in × 8.75in with bleed), cut at the fold. */
 .spread-pic { position: absolute; top: 0; width: 17.25in; height: 8.75in; object-fit: cover; object-position: center; }
 .pg.l .spread-pic { left: 0; } .pg.r .spread-pic { left: -8.5in; }
-.words { position: absolute; top: 50%; transform: translateY(-50%); width: 4.6in; padding: 0.3in 0.34in; display: grid; gap: 0.6em;
-  background: rgba(251, 246, 236, .93); border-radius: 0.22in; font: 500 16pt/1.42 var(--display); letter-spacing: -0.005em;
-  box-shadow: 0 0 0.3in 0.12in rgba(251, 246, 236, .7); }
-.pg.l .words { left: var(--safe); } .pg.r .words { right: var(--safe); }
+/* Words: like the website, a cream panel over the outer third of the spread (the third the scene
+   prompts keep free of characters), full height, fading softly into the picture. */
+.words { position: absolute; top: 0; bottom: 0; width: 5.475in; padding: var(--safe) 0.5in var(--safe) var(--safe);
+  display: grid; align-content: center; gap: 0.55em; background: rgba(251, 246, 236, .95);
+  font: 500 var(--fs, 24pt)/1.4 var(--display); letter-spacing: -0.005em; }
+.pg.l .words { left: 0; }
+.pg.r .words { right: 0; padding: var(--safe) var(--safe) var(--safe) 0.5in; }
+.words::before { content: ""; position: absolute; top: 0; bottom: 0; width: 1in; }
+.pg.l .words::before { left: 100%; background: linear-gradient(90deg, rgba(251, 246, 236, .95), rgba(251, 246, 236, 0)); }
+.pg.r .words::before { right: 100%; background: linear-gradient(270deg, rgba(251, 246, 236, .95), rgba(251, 246, 236, 0)); }
 .words p { margin: 0; }
 .words b { color: var(--red); }
 

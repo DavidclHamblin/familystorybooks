@@ -97,6 +97,14 @@
   load().then(function () {
     root.innerHTML = part === "cover" ? cover() : interior();
     var imgs = [].slice.call(root.querySelectorAll("img"));
+    // Long passages shrink a little (24pt down to 17pt) so the words always fit their panel.
+    return document.fonts.ready.then(function () {
+      [].forEach.call(root.querySelectorAll(".words"), function (w) {
+        for (var pt = 24; pt > 17 && w.scrollHeight > w.clientHeight; pt -= 0.5) w.style.setProperty("--fs", pt + "pt");
+      });
+      return imgs;
+    });
+  }).then(function (imgs) {
     return Promise.all([document.fonts.ready].concat(imgs.map(function (i) {
       return i.complete ? (i.naturalWidth ? null : Promise.reject(new Error("a picture didn't load"))) :
         new Promise(function (ok, no) { i.onload = ok; i.onerror = function () { no(new Error("a picture didn't load")); }; });
