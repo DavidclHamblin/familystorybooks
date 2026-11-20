@@ -44,15 +44,13 @@ html, body { margin: 0; padding: 0; background: #ddd; color: var(--ink); -webkit
 .spread-pic { position: absolute; top: 0; width: 17.25in; height: 8.75in; object-fit: cover; object-position: center; }
 .pg.l .spread-pic { left: 0; } .pg.r .spread-pic { left: -8.5in; }
 /* Words: like the website, a cream panel over the outer third of the spread (the third the scene
-   prompts keep free of characters), full height, fading softly into the picture. */
+   prompts keep free of characters), full height, fading softly into the picture. The panel is painted
+   into the picture itself, because see-through layers in a PDF show up pink in some viewers and printers. */
 .words { position: absolute; top: 0; bottom: 0; width: 5.475in; padding: var(--safe) 0.5in var(--safe) var(--safe);
-  display: grid; align-content: center; gap: 0.55em; background: rgba(251, 246, 236, .95);
+  display: grid; align-content: center; gap: 0.55em; /* the cream panel and its fade are painted into the picture (print.js) */
   font: 500 var(--fs, 24pt)/1.4 var(--display); letter-spacing: -0.005em; }
 .pg.l .words { left: 0; }
 .pg.r .words { right: 0; padding: var(--safe) var(--safe) var(--safe) 0.5in; }
-.words::before { content: ""; position: absolute; top: 0; bottom: 0; width: 1in; }
-.pg.l .words::before { left: 100%; background: linear-gradient(90deg, rgba(251, 246, 236, .95), rgba(251, 246, 236, 0)); }
-.pg.r .words::before { right: 100%; background: linear-gradient(270deg, rgba(251, 246, 236, .95), rgba(251, 246, 236, 0)); }
 .words p { margin: 0; }
 .words b { color: var(--red); }
 
@@ -68,12 +66,12 @@ html, body { margin: 0; padding: 0; background: #ddd; color: var(--ink); -webkit
 /* Panels in mm, measured from Lulu's sheet: wrap and bleed W on each edge, back 216, spine S, front 216. */
 .cv-back, .cv-front { position: absolute; top: var(--w); width: 216mm; height: 216mm; }
 .cv-back { left: var(--w); } .cv-front { right: var(--w); }
-.cv-spine { position: absolute; top: 0; bottom: 0; left: calc(var(--w) + 216mm); width: var(--s); background: rgba(0, 0, 0, .12); }
+.cv-spine { position: absolute; top: 0; bottom: 0; left: calc(var(--w) + 216mm); width: var(--s); background: color-mix(in srgb, var(--cover) 88%, #000); }
 .cv-safe { position: absolute; inset: 12.7mm; display: grid; }
 .cv-front .cv-safe { align-content: space-between; justify-items: center; text-align: center; }
-.cv-kicker { font: 700 12pt/1 var(--body); letter-spacing: .16em; text-transform: uppercase; opacity: .9; }
-.cv-title { font: 800 40pt/1 var(--display); letter-spacing: -0.02em; margin: 0; text-wrap: balance; text-shadow: 0 0.6mm 0 rgba(0,0,0,.18); }
-.cv-art { width: 112mm; height: 112mm; border-radius: 50%; background: #fff; border: 2.5mm solid rgba(255,255,255,.45); background-clip: padding-box; display: grid; place-items: center; overflow: hidden; }
+.cv-kicker { font: 700 12pt/1 var(--body); letter-spacing: .16em; text-transform: uppercase; }
+.cv-title { font: 800 40pt/1 var(--display); letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+.cv-art { width: 112mm; height: 112mm; border-radius: 50%; background: #fff; border: 2.5mm solid color-mix(in srgb, var(--cover) 55%, #fff); display: grid; place-items: center; overflow: hidden; }
 .cv-art img { width: 84%; height: 100%; object-fit: contain; object-position: bottom; }
 .cv-star { font: 600 14pt/1.3 var(--display); margin: 0; text-wrap: balance; }
 .cv-back .cv-safe { align-content: space-between; }
@@ -81,4 +79,4 @@ html, body { margin: 0; padding: 0; background: #ddd; color: var(--ink); -webkit
 .cv-brand { display: grid; gap: 3mm; justify-items: start; }
 .cv-brand .brand { color: #fff; font-size: 16pt; }
 .cv-brand .brand svg { width: 12mm; height: 12mm; background: #fff; border-radius: 3mm; padding: 1.2mm; }
-.cv-url { font: 600 11pt/1 var(--body); opacity: .9; }
+.cv-url { font: 600 11pt/1 var(--body); }

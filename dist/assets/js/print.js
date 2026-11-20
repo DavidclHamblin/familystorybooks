@@ -56,6 +56,35 @@
     });
   }
 
+  // Paint each spread's cream word panel and its fade into the picture, as one solid JPEG.
+  // (A see-through panel over the picture shows up pink in some PDF viewers and printers.)
+  var SPREAD_W = 17.25, PANEL = 5.475, FADE = 1, CREAM = [251, 246, 236];
+  function flatten() {
+    return Promise.all(S.pages.map(function (p, i) {
+      var slot = "s" + (i + 1);
+      return new Promise(function (ok, no) {
+        var im = new Image();
+        im.onload = function () {
+          // The picture fills 17.25 × 8.75 in (cover): work out the part that shows, then paint at 300 ppi at most.
+          var ratio = SPREAD_W / 8.75, sw = im.naturalWidth, sh = sw / ratio, sy = (im.naturalHeight - sh) / 2;
+          if (sh > im.naturalHeight) { sh = im.naturalHeight; sw = sh * ratio; sy = 0; }
+          var sx = (im.naturalWidth - sw) / 2, W = Math.min(Math.round(sw), Math.round(SPREAD_W * 300)), H = Math.round(W / ratio);
+          var c = document.createElement("canvas"); c.width = W; c.height = H;
+          var g = c.getContext("2d"); g.drawImage(im, sx, sy, sw, sh, 0, 0, W, H);
+          var px = W / SPREAD_W, rgb = CREAM.join(","), left = p.side === "left";
+          var x0 = left ? 0 : (SPREAD_W - PANEL) * px, edge = left ? PANEL * px : (SPREAD_W - PANEL) * px;
+          g.fillStyle = "rgba(" + rgb + ",.95)"; g.fillRect(x0, 0, PANEL * px, H);
+          var gr = g.createLinearGradient(edge, 0, left ? edge + FADE * px : edge - FADE * px, 0);
+          gr.addColorStop(0, "rgba(" + rgb + ",.95)"); gr.addColorStop(1, "rgba(" + rgb + ",0)");
+          g.fillStyle = gr; g.fillRect(left ? edge : edge - FADE * px, 0, FADE * px, H);
+          c.toBlob(function (b) { if (!b) return no(new Error("couldn't prepare " + slot)); pics[slot] = URL.createObjectURL(b); ok(); }, "image/jpeg", 0.92);
+        };
+        im.onerror = function () { no(new Error("couldn't load " + slot)); };
+        im.src = pics[slot];
+      });
+    }));
+  }
+
   // ---------- pages ----------
   function pg(side, cls, inner) { return '<section class="pg ' + side + " " + cls + '">' + inner + "</section>"; }
   function img(slot, cls, alt) { return '<img class="' + cls + '" src="' + pics[slot] + '" alt="' + esc(alt || "") + '">'; }
@@ -94,7 +123,7 @@
       '</h1><div class="cv-art">' + img("c-hero", "", name("hero")) + '</div><p class="cv-star">Starring ' + starring() + "</p></div></div></section>";
   }
 
-  load().then(function () {
+  load().then(function () { return part === "cover" ? null : flatten(); }).then(function () {
     root.innerHTML = part === "cover" ? cover() : interior();
     var imgs = [].slice.call(root.querySelectorAll("img"));
     // Long passages shrink a little (24pt down to 17pt) so the words always fit their panel.
