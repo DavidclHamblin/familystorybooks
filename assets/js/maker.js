@@ -1,6 +1,6 @@
 /* Family Storybooks: "Meet your characters". The family adds a photo for each part, and our shared
-   photo and cartoon service draws each person as a story character. Only the characters page is
-   drawn before ordering; the rest of the book is drawn after ordering, from the approved characters.
+   photo and cartoon service draws each person as a story character. The characters page and two
+   story pages are drawn before ordering; the rest of the book is drawn after ordering, from the approved characters.
    Photos are shrunk and stripped of hidden data (such as location) in the browser before upload, kept
    in private storage, and never shown anywhere except back to this browser. */
 (function () {
@@ -103,7 +103,12 @@
     }).then(function () {
       btn.disabled = false;
       var failed = roles.filter(function (r) { return errors[r.key]; });
-      if (!failed.length) { msg.textContent = "Here they are! Have a look at your characters page in the book above." + (samplePages().length ? " Next, you can paint story pages with them." : ""); cast.show("meet"); }
+      if (!failed.length) {
+        cast.show("meet");
+        // Go straight on to paint the two story pages with the family, so nobody misses them.
+        if (samplePages().length && !samplePages().every(function (n) { return cast.toons["s" + n]; })) paintSamples(true);
+        else msg.textContent = "Here they are! Have a look at your characters page in the book above.";
+      }
       else if (!/free/i.test(msg.textContent)) msg.textContent = "Some characters couldn't be drawn. You can try those again, or use a different photo.";
     }, function (e) { btn.disabled = false; msg.textContent = e.message; });
   }
@@ -127,11 +132,11 @@
       if (/^s\d+$/.test(s) && castOf(+s.slice(1)).indexOf(k) >= 0) { URL.revokeObjectURL(cast.toons[s]); delete cast.toons[s]; }
     });
   }
-  function paintSamples() {
+  function paintSamples(after) {
     var d = saved(), want = samplePages();
     if (!d || !want.length || sampleBusy) return;
     sampleBusy = true; paintSampleBtn();
-    msg.textContent = "Painting " + (want.length > 1 ? want.length + " pages" : "a page") + " with your family. This takes about a minute…";
+    msg.textContent = (after === true ? "Here are your characters! Now we're painting " : "Painting ") + (want.length > 1 ? want.length + " story pages" : "a story page") + " with your family. This takes about a minute…";
     var failed = null;
     Promise.all(want.map(function (n) {
       return req("POST", "/api/drafts/" + d.id + "/cartoons/s" + n, d, { story: key }).then(function (j) {
@@ -151,7 +156,7 @@
     sampleBtn.disabled = sampleBusy || roles.some(function (r) { return busy[r.key]; });
     sampleBtn.textContent = sampleBusy ? "Painting…" : "Paint " + (want.length > 1 ? want.length + " story pages" : "a story page") + " with my family";
   }
-  if (sampleBtn) sampleBtn.addEventListener("click", paintSamples);
+  if (sampleBtn) sampleBtn.addEventListener("click", function () { paintSamples(); });
 
   // ---------- the cards ----------
   var cards = root.querySelector(".mk-cards");
