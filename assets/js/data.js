@@ -46,10 +46,9 @@ FST.prices = {
   book: { name: "Your storybook", price: 39, pages: "Hardcover, 12 illustrated spreads",
           detail: "Your family as the characters, a “Meet the characters” page, your child's name on the cover and a dedication page." },
   copy: { name: "Extra copy", price: 25, pages: "The same book again",
-          detail: "Ordered with your book, for grandparents, cousins and godparents." },
-  giftbox: { name: "Gift box", price: 5 }
+          detail: "Ordered with your book, for grandparents, cousins and godparents." }
 };
-FST.gbp = { 39: 34, 25: 22, 5: 4 };
+FST.gbp = { 39: 34, 25: 22 };
 
 /* Stories. "ready" stories are written and illustrated; the rest are coming soon.
    Roles are the parts the family plays. Villains are always our own characters, never family. */
