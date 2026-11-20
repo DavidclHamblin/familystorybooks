@@ -416,6 +416,31 @@ def account():
     return page("My orders | Family Storybooks", "Sign in to see your Family Storybooks orders, follow your parcel and approve your pages.", "account.html", body, "account", ("account.js",))
 
 
+def print_page():
+    """Print files for Lulu (not linked from the site, not indexed): see assets/js/print.js."""
+    return f"""<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Print files | Family Storybooks</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="{FONTS}">
+<link rel="stylesheet" href="{v("css/print.css")}">
+</head>
+<body>
+<p class="status" id="status" role="status">Building the print file…</p>
+<div id="book"></div>
+<script src="{v("js/data.js")}"></script>
+<script src="{v("js/print.js")}"></script>
+</body>
+</html>
+"""
+
+
 def main():
     if DIST.exists():
         shutil.rmtree(DIST)
@@ -427,6 +452,7 @@ def main():
             pages[f"{STORIES[k]['slug']}.html"] = story(k)
     for name, html in pages.items():
         (DIST / name).write_text(html)
+    (DIST / "print.html").write_text(print_page())  # kept out of the sitemap
     (DIST / "CNAME").write_text(DOMAIN + "\n")
     (DIST / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {SITE}/sitemap.xml\n")
     urls = "".join(f"<url><loc>{SITE}/{'' if n == 'index.html' else n}</loc></url>" for n in pages)
