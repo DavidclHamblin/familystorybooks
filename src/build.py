@@ -287,7 +287,7 @@ def faq_html():
 
 
 def pricing(cta_href="#join"):
-    b, c, g = PRICES["book"], PRICES["copy"], PRICES["giftbox"]
+    b, c = PRICES["book"], PRICES["copy"]
     return f"""<section id="pricing" class="section" style="--bc:var(--red);padding-top:0"><div class="wrap">
 <div class="sec-head"><p class="eyebrow">Pricing</p><h2>Launch prices</h2><p class="lede">One simple price for every story. Founding families on our list get {DISCOUNT}% off their first book.</p></div>
 <div class="editions">
@@ -296,7 +296,7 @@ def pricing(cta_href="#join"):
 </div>
 <div class="opts">
 <div class="opt"><h3>Free preview</h3><p>Flick through the story and see your family drawn as characters before you pay.</p></div>
-<div class="opt"><h3>Gift box +{money(g["price"])}</h3><p>A keepsake box with a ribbon, ready to give.</p></div>
+<div class="opt"><h3>Printed and posted</h3><p>Printed on demand by our printer and posted straight to your door.</p></div>
 <div class="opt"><h3>Delivery</h3><p>To the UK and Europe. Delivery costs are shown at checkout.</p></div>
 </div>
 <p class="note">Launch prices. We confirm final prices before ordering opens.</p>
