@@ -2,6 +2,7 @@
    print.html?story=redhood                      our example book (stand-ins and example art), for checking the layout
    print.html?story=redhood&d=<draft>#<token>    a customer's book, from the cartoon service
    &part=cover                                   the cover sheet instead of the 28 inside pages
+   &full=1                                       example book only: stretch its pictures to full print size (a trial of file size)
    Save as PDF from Chrome (or headless Chrome): page sizes come from print.css. When everything has loaded,
    <body data-ready="1">; if something is missing, <body data-error="..."> and the page says what. */
 (function () {
@@ -58,6 +59,7 @@
 
   // Paint each spread's cream word panel and its fade into the picture, as one solid JPEG.
   // (A see-through panel over the picture shows up pink in some PDF viewers and printers.)
+  var full = !draft && q.get("full") === "1";
   var SPREAD_W = 17.25, PANEL = 5.475, FADE = 1, CREAM = [251, 246, 236];
   function flatten() {
     return Promise.all(S.pages.map(function (p, i) {
@@ -68,7 +70,7 @@
           // The picture fills 17.25 × 8.75 in (cover): work out the part that shows, then paint at 300 ppi at most.
           var ratio = SPREAD_W / 8.75, sw = im.naturalWidth, sh = sw / ratio, sy = (im.naturalHeight - sh) / 2;
           if (sh > im.naturalHeight) { sh = im.naturalHeight; sw = sh * ratio; sy = 0; }
-          var sx = (im.naturalWidth - sw) / 2, W = Math.min(Math.round(sw), Math.round(SPREAD_W * 300)), H = Math.round(W / ratio);
+          var sx = (im.naturalWidth - sw) / 2, W = full ? Math.round(SPREAD_W * 300) : Math.min(Math.round(sw), Math.round(SPREAD_W * 300)), H = Math.round(W / ratio);
           var c = document.createElement("canvas"); c.width = W; c.height = H;
           var g = c.getContext("2d"); g.drawImage(im, sx, sy, sw, sh, 0, 0, W, H);
           var px = W / SPREAD_W, rgb = CREAM.join(","), left = p.side === "left";
