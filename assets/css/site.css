@@ -462,6 +462,12 @@ textarea { min-height: 90px; resize: vertical; }
 .acct-steps li.now { border-color: var(--red); color: var(--text); }
 .acct-items { margin: 0; padding-left: 20px; }
 .acct-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.acct-problem { display: grid; gap: 10px; border-top: 1px solid var(--line); padding-top: 14px; }
+.acct-problem h4 { margin: 0; font-size: 17px; }
+.acct-problem p { margin: 0; }
+.acct-problem label { display: grid; gap: 6px; font-weight: 600; font-size: 15px; }
+.acct-problem select, .acct-problem textarea, .acct-problem input[type=file] { font: inherit; font-weight: 400; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg, #fff); color: inherit; max-width: 100%; }
+.acct-problem-msg:empty { display: none; }
 .acct-flag { margin: 0; font-weight: 600; color: var(--red); }
 .acct-others { margin: 0; padding: 14px 18px 14px 36px; border-radius: 14px; background: var(--surface-2, var(--surface)); border: 1px dashed var(--line); }
 .acct-top h2 { font-size: clamp(22px, 3vw, 28px); }

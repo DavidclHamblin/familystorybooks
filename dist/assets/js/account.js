@@ -150,7 +150,9 @@
   function stage(o) {
     var f = o.fulfillments.nodes;
     if (f.some(function (x) { return x.latestShipmentStatus === "DELIVERED"; })) return 3;
-    if (f.some(function (x) { return x.status === "SUCCESS" || (x.trackingInformation || []).length; })) return 2;
+    // We mark an order fulfilled (without tracking) when it goes to the printer, so it can't be cancelled from then on.
+    // It counts as posted once the printer's tracking arrives.
+    if (f.some(function (x) { return (x.trackingInformation || []).length; })) return 2;
     if (o.financialStatus === "PAID" || o.financialStatus === "PARTIALLY_REFUNDED") return 1;
     return 0;
   }
@@ -179,6 +181,7 @@
           : '<span class="muted">Tracking number ' + esc(t.number) + "</span>";
       }).join("") +
       (o.statusPageUrl ? '<a class="btn btn-sm ghost" href="' + esc(o.statusPageUrl) + '" target="_blank" rel="noopener">Order details</a>' : "") +
+      (link && !refunded && s >= 1 ? '<button type="button" class="btn btn-sm ghost" data-problem="' + esc(link) + '" data-order="' + esc(o.name) + '">Report a problem</button>' : "") +
       "</div></article>";
   }
 
@@ -220,9 +223,70 @@
       '<p class="small">Still stuck? Email <a href="mailto:' + esc(F.config.email) + '">' + esc(F.config.email) + "</a>.</p></div>");
   }
 
+  // ---------- Report a problem ----------
+  // Reason, a few words and up to 4 photos (made smaller here first), sent with the book's private link,
+  // so only the family who ordered can report. We email back with a reprint or a refund.
+  var REASONS = [["damaged", "Arrived damaged"], ["fault", "Printing fault"], ["proof", "Doesn't match the proof I approved"], ["lost", "Parcel hasn't arrived"], ["other", "Something else"]];
+  function bookFromLink(link) {
+    try { var u = new URL(link, location.href); return { id: u.searchParams.get("d"), token: decodeURIComponent(u.hash.slice(1)) }; } catch (e) { return {}; }
+  }
+  function shrink(file) {
+    return new Promise(function (ok, fail) {
+      var img = new Image(), url = URL.createObjectURL(file);
+      img.onload = function () {
+        var k = Math.min(1, 1600 / Math.max(img.width, img.height)), c = document.createElement("canvas");
+        c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+        ok(c.toDataURL("image/jpeg", 0.85).split(",")[1]);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); fail(new Error("We couldn't read one of the photos. Please try a JPEG or PNG.")); };
+      img.src = url;
+    });
+  }
+  function problemForm(btn) {
+    var art = btn.closest(".acct-order"), old = art.querySelector(".acct-problem");
+    if (old) { old.remove(); return; }
+    var form = document.createElement("form");
+    form.className = "acct-problem"; form.noValidate = true;
+    form.innerHTML = "<h4>Report a problem with order " + esc(btn.dataset.order) + "</h4>" +
+      "<p class=\"small muted\">Tell us what's wrong and add photos if you can. We'll email you, usually within a working day, to put it right with a reprint or a refund.</p>" +
+      '<label>What\'s wrong?<select name="reason" required><option value="">Choose one</option>' + REASONS.map(function (r) { return '<option value="' + r[0] + '">' + r[1] + "</option>"; }).join("") + "</select></label>" +
+      '<label>Tell us more<textarea name="details" rows="4" maxlength="2000" required></textarea></label>' +
+      '<label>Photos (up to 4)<input type="file" name="photos" accept="image/*" multiple></label>' +
+      '<p class="acct-problem-msg" role="status"></p>' +
+      '<div class="acct-actions"><button type="submit" class="btn btn-sm red">Send report</button><button type="button" class="btn btn-sm ghost" data-cancel>Cancel</button></div>';
+    art.appendChild(form);
+    form.querySelector("[data-cancel]").addEventListener("click", function () { form.remove(); });
+    form.addEventListener("input", function () { var m = form.querySelector(".acct-problem-msg"); if (m && !form.querySelector("[type=submit]").disabled) m.textContent = ""; });
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var msg = form.querySelector(".acct-problem-msg"), send = form.querySelector("[type=submit]");
+      var reason = form.reason.value, details = form.details.value.trim(), files = Array.prototype.slice.call(form.photos.files || []);
+      if (!reason) { msg.textContent = "Please choose what's wrong."; return; }
+      if (details.length < 5) { msg.textContent = "Please tell us a little about the problem."; return; }
+      if (files.length > 4) { msg.textContent = "Please choose at most 4 photos."; return; }
+      var book = bookFromLink(btn.dataset.problem);
+      if (!book.id || !book.token) { msg.innerHTML = 'Please email <a href="mailto:' + esc(F.config.email) + '">' + esc(F.config.email) + "</a> with your order number and photos."; return; }
+      send.disabled = true; msg.textContent = "Sending…";
+      Promise.all(files.map(shrink)).then(function (photos) {
+        return fetch(F.config.api.replace(/\/+$/, "") + "/api/drafts/" + book.id + "/problems", {
+          method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + book.token },
+          body: JSON.stringify({ reason: reason, details: details, photos: photos })
+        }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok) throw new Error(j.error || "Something went wrong."); return j; }); });
+      }).then(function () {
+        form.innerHTML = "<h4>Thank you, we've got your report</h4><p>We'll email you soon to put it right. If you need to add anything, reply to that email.</p>";
+      }).catch(function (err) {
+        send.disabled = false;
+        msg.innerHTML = esc(err.message) + ' You can also email <a href="mailto:' + esc(F.config.email) + '">' + esc(F.config.email) + "</a>.";
+      });
+    });
+    form.reason.focus();
+  }
+
   root.addEventListener("click", function (e) {
     if (e.target.closest("[data-signin]")) signIn();
     if (e.target.closest("[data-signout]")) signOut();
+    var pb = e.target.closest("[data-problem]"); if (pb) problemForm(pb);
   });
 
   var params = new URLSearchParams(location.search);
