@@ -94,7 +94,7 @@
       '<p class="ord-total">Total <b>' + cur + total + '</b> <span class="muted">plus delivery, shown at checkout</span></p>' +
       '<button type="button" class="btn red ord-go"' + (busy ? " disabled" : "") + ">" + (busy ? "Please wait…" : "Order my book") + "</button>" +
       '<p class="ord-msg" role="status" aria-live="polite">' + esc(note || why) + "</p>" +
-      '<p class="small muted">After you pay, we paint every page with your family and send you a private link to check them. Nothing is printed until you approve it. ' +
+      '<p class="small muted">After you pay, we paint every page with your family and email you a private link when they’re ready, usually within a few hours. Checking them is optional: you can ask for any page to be painted again, or approve it to print straight away. If you don’t, we print your book as it is four days after the pages are ready, so a gift isn’t delayed. ' +
       "Please give a phone number at checkout: our printer's courier needs it.</p>";
   }
 

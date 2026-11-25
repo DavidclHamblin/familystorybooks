@@ -22,7 +22,7 @@
   // ---------- Not switched on yet ----------
   if (!A.clientId || !A.shop) {
     show('<div class="acct-card"><h2>Order tracking opens with ordering</h2>' +
-      "<p>When you order a storybook, you'll sign in here with a one-time code sent to your email to see your order, follow your parcel and approve your pages.</p>" +
+      "<p>When you order a storybook, you'll sign in here with a one-time code sent to your email to see your order, follow your parcel and check your pages.</p>" +
       '<p>Ordered something already, or have a question? Email <a href="mailto:' + esc(F.config.email) + '">' + esc(F.config.email) + "</a> and we'll help.</p>" +
       '<p><a class="btn red" href="index.html#join">Join the list</a></p></div>');
     return;
@@ -175,7 +175,7 @@
         }).join("") + "</ol>") +
       "<ul class=\"acct-items\">" + items + "</ul>" +
       '<div class="acct-actions">' +
-      (link && !refunded && s < 2 ? '<a class="btn btn-sm red" href="' + esc(link) + '">See and approve your pages</a>' : "") +
+      (link && !refunded && s < 2 ? '<a class="btn btn-sm red" href="' + esc(link) + '">Check your book’s pages</a>' : "") +
       tracking.map(function (t) {
         return t.url ? '<a class="btn btn-sm" href="' + esc(t.url) + '" target="_blank" rel="noopener">Track parcel' + (t.company ? " (" + esc(t.company) + ")" : "") + "</a>"
           : '<span class="muted">Tracking number ' + esc(t.number) + "</span>";
@@ -204,7 +204,7 @@
     show('<div class="acct-top"><div><h2>' + hello + "</h2>" + (email ? '<p class="muted">Signed in as ' + esc(email) + "</p>" : "") + "</div>" +
       '<button type="button" class="btn btn-sm ghost" data-signout>Sign out</button></div>' +
       (mine.length ? mine.map(orderCard).join("") :
-        '<div class="acct-card"><h3>No storybook orders yet</h3><p>When you order a storybook it will appear here, with your private link to see and approve every page.</p><p><a class="btn red" href="index.html#stories">Choose a story</a></p></div>') +
+        '<div class="acct-card"><h3>No storybook orders yet</h3><p>When you order a storybook it will appear here, with your private link to see every page.</p><p><a class="btn red" href="index.html#stories">Choose a story</a></p></div>') +
       (otherHtml ? '<ul class="acct-others">' + otherHtml + "</ul>" : "") +
       '<p class="small muted">Questions about an order? Email <a href="mailto:' + esc(F.config.email) + '">' + esc(F.config.email) + "</a> with your order number.</p>");
   }

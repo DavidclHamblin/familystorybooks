@@ -1,13 +1,13 @@
 /* Family Storybooks: the customer's private proof page (proof.html?d=<draft>#<token>), linked from the order.
-   After payment it paints every page of the book with the family at print size, lets them have any picture
-   painted again, and approve the book. Approving sends it to the printer (the cartoon service's print queue).
-   Opening the link again carries on where it stopped. */
+   After payment the cartoon service paints every page on its own (painting.js there) and emails the customer when
+   they're ready. This page shows how far it has got, lets the customer have any page painted again, and approve the
+   book. Checking is optional: a book that isn't approved goes to print on its own four days after the pages were ready. */
 (function () {
   "use strict";
   var F = window.FST, esc = F.esc, root = document.getElementById("proof");
   var q = new URLSearchParams(location.search), id = q.get("d") || "", token = decodeURIComponent(location.hash.replace(/^#/, ""));
   var API = ((function () { try { return localStorage.getItem("fst-api"); } catch (e) { return ""; } })() || F.config.api || "").replace(/\/+$/, "");
-  var st = null, key = null, S = null, imgs = {}, busy = {}, errs = {}, queue = [], active = 0, MAX = 2, msg = "", sure = false, waited = 0;
+  var st = null, key = null, S = null, imgs = {}, busy = {}, errs = {}, queue = [], active = 0, MAX = 2, msg = "", sure = false, waited = 0, polls = 0;
 
   function box(h, p) { root.innerHTML = '<section class="pf-box"><h1>' + esc(h) + "</h1><p>" + esc(p) + "</p></section>"; }
   if (!/^[a-z0-9]{20}$/.test(id) || !token) return box("This link isn't complete", "Please open the full link from your order email, or email " + F.config.email + " and we'll send it again.");
@@ -47,16 +47,17 @@
   function allReady() { return readyCount() === S.pages.length && !active && !queue.length; }
 
   // Characters first (a part with no photo gets our stand-in, painted into this book), then every page at print size.
+  // Our server paints the book; while it's working, look again every 30 seconds (for up to an hour) to show progress.
   function plan() {
-    if (!st.paid || st.approved) return;
-    var want = charsDone() ? sceneSlots().filter(function (s) { return !sharp(s); }) : charSlots().filter(function (s) { return !has(s); });
-    want.forEach(function (s) { if (queue.indexOf(s) < 0 && !busy[s] && !errs[s]) queue.push(s); });
+    if (!st.paid || st.approved || (allReady() && st.paint && st.paint.readyAt) || polls > 120) return;
+    polls++;
+    setTimeout(function () { if (active || queue.length) return plan(); load().then(function () { paint(); plan(); }, plan); }, 30000);
     run();
   }
   function run() { while (active < MAX && queue.length) start(queue.shift()); }
   function start(s) {
     active++; busy[s] = true; errs[s] = ""; paint();
-    attempt(s, 0).then(function () { busy[s] = false; active--; paint(); if (!queue.length && !active) plan(); else run(); });
+    attempt(s, 0).then(function () { busy[s] = false; active--; paint(); run(); });
   }
   function attempt(s, tries) {
     var body = { story: key };
@@ -84,6 +85,10 @@
       '<div class="bv-text">' + p.text.split("\n").map(function (l) { return "<p>" + fill(l) + "</p>"; }).join("") + "</div></div>" +
       "<figcaption><span>Pages " + (4 + i * 2) + " and " + (5 + i * 2) + "</span>" + ctl + "</figcaption></figure>";
   }
+  function printOn() {
+    var t = st.paint && st.paint.printOn;
+    return t ? new Date(t).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }) : "";
+  }
   function printLine() {
     var p = st.print || {}, s = p.status || "";
     var words = { QUEUED: "Approved. We're preparing your print files.", PDF_READY: "Your print files are ready and on their way to our printer.",
@@ -98,23 +103,25 @@
     var status;
     if (!st.paid) status = '<div class="pf-bar"><p>We’re waiting for your payment to be confirmed. This page will carry on by itself in a moment.</p></div>';
     else if (st.approved) status = '<div class="pf-bar ok">' + printLine() + "</div>";
-    else if (!charsDone()) status = '<div class="pf-bar"><p><span class="pf-spin" aria-hidden="true"></span> Getting your characters ready for every page…</p></div>';
-    else status = '<div class="pf-bar"><p>' + (n < total ? '<span class="pf-spin" aria-hidden="true"></span> Painting your book: <b>' + n + " of " + total + "</b> pages ready. This takes a few minutes; you can leave this page and come back with the same link."
-      : "<b>Every page is ready.</b> Please check each one, then approve your book below.") + "</p>" +
+    else if (st.paint && st.paint.stuck && n < total) status = '<div class="pf-bar"><p><b>We’ve hit a snag painting your book.</b> Our team has been told and is on it. We’ll email you as soon as your pages are ready, so you don’t need to keep this page open.</p></div>';
+    else if (n < total) status = '<div class="pf-bar"><p><span class="pf-spin" aria-hidden="true"></span> ' + (charsDone() ? "We’re painting your book: <b>" + n + " of " + total + "</b> pages ready." : "We’re getting your characters ready for every page.") +
+      " This can take up to an hour. <b>You don’t need to keep this page open:</b> we’ll email you when every page is ready.</p>" +
       '<div class="pf-meter"><i style="width:' + Math.round(100 * n / total) + '%"></i></div></div>';
+    else status = '<div class="pf-bar ok"><p><b>Every page is ready.</b> Checking them is optional. Have a look, ask for any page to be painted again, and press Approve to print straight away.' +
+      (printOn() ? " If you don’t, we’ll print your book as it is on <b>" + esc(printOn()) + "</b>, so it isn’t delayed." : "") + "</p></div>";
     var cast = '<section class="pf-cast"><h2>Meet the characters</h2><div class="bv-cast">' + charSlots().map(function (s) {
       var k = s.slice(2), r = S.roles.filter(function (x) { return x.key === k; })[0];
       var src = imgs[s] || (S.art + (k === "villain" ? "villain" : k) + ".webp");
       return '<figure class="drawn"><img src="' + src + '" alt="">' + "<figcaption>" + (r ? esc(name(k)) + "<span>as " + esc(r.name) + "</span>" : esc(S.villain.name) + "<span>our own character</span>") + "</figcaption></figure>";
     }).join("") + "</div>" +
       '<p class="pf-ded"><span class="muted">Dedication:</span> ' + (ded ? esc(ded).replace(/\n/g, "<br>") : fill(S.dedication, true)) + "</p>" +
-      '<p class="small muted">A name or the dedication needs changing? Email ' + esc(F.config.email) + " before you approve, and we'll fix it.</p></section>";
+      '<p class="small muted">A name or the dedication needs changing? Email ' + esc(F.config.email) + (printOn() ? " before " + esc(printOn()) : " before you approve") + ", and we'll fix it.</p></section>";
     var pages = '<section class="pf-pages">' + S.pages.map(scene).join("") + "</section>";
     var approve = "";
-    if (st.paid && !st.approved) approve = '<section class="pf-approve"><h2>Approve your book</h2>' +
-      '<label class="check"><input type="checkbox" id="pf-sure"' + (sure ? " checked" : "") + (allReady() ? "" : " disabled") + "><span>I've checked every page, the names and the dedication. Please print my book.</span></label>" +
+    if (st.paid && !st.approved) approve = '<section class="pf-approve"><h2>Happy with it? Approve your book</h2>' +
+      '<label class="check"><input type="checkbox" id="pf-sure"' + (sure ? " checked" : "") + (allReady() ? "" : " disabled") + "><span>I've looked at the pages, the names and the dedication. Please print my book.</span></label>" +
       '<button type="button" class="btn red pf-ok"' + (allReady() && sure ? "" : " disabled") + ">Approve and print</button>" +
-      '<p class="pf-msg" role="status" aria-live="polite">' + esc(msg || (allReady() ? "" : "You can approve once every page is ready.")) + "</p></section>";
+      '<p class="pf-msg" role="status" aria-live="polite">' + esc(msg || (allReady() ? "This step is optional." + (printOn() ? " If you don’t approve, we’ll print your book as it is on " + printOn() + "." : "") : "You can approve once every page is ready.")) + "</p></section>";
     root.innerHTML = head + status + cast + pages + approve;
   }
 
