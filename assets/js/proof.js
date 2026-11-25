@@ -101,6 +101,10 @@
     var t = st.paint && st.paint.printOn;
     return t ? new Date(t).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }) : "";
   }
+  function printOn() {
+    var t = st.paint && st.paint.printOn;
+    return t ? new Date(t).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }) : "";
+  }
   function printLine() {
     var p = st.print || {}, s = p.status || "";
     var words = { QUEUED: "Approved. We're preparing your print files.", PDF_READY: "Your print files are ready and on their way to our printer.",
