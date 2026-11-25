@@ -7,7 +7,7 @@
   var F = window.FST, esc = F.esc, root = document.getElementById("proof");
   var q = new URLSearchParams(location.search), id = q.get("d") || "", token = decodeURIComponent(location.hash.replace(/^#/, ""));
   var API = ((function () { try { return localStorage.getItem("fst-api"); } catch (e) { return ""; } })() || F.config.api || "").replace(/\/+$/, "");
-  var st = null, key = null, S = null, imgs = {}, busy = {}, errs = {}, queue = [], active = 0, MAX = 2, msg = "", sure = false, waited = 0, polls = 0;
+  var st = null, key = null, S = null, imgs = {}, busy = {}, errs = {}, queue = [], active = 0, MAX = 2, msg = "", sure = false, waited = 0, polls = 0, open = {}, notes = {}, sent = {};
 
   function box(h, p) { root.innerHTML = '<section class="pf-box"><h1>' + esc(h) + "</h1><p>" + esc(p) + "</p></section>"; }
   if (!/^[a-z0-9]{20}$/.test(id) || !token) return box("This link isn't complete", "Please open the full link from your order email, or email " + F.config.email + " and we'll send it again.");
@@ -61,6 +61,7 @@
   }
   function attempt(s, tries) {
     var body = { story: key };
+    if (notes["redo-" + s]) body.note = notes["redo-" + s];
     if (/^c-/.test(s) && s !== "c-villain" && st.photos.indexOf(s) < 0) body.standin = true;
     return req("POST", "/cartoons/" + s, body).then(function (j) { st = j; return image(s); })
       .catch(function (e) {
@@ -76,14 +77,25 @@
     else if (busy[slot]) pic = '<div class="pf-wait"><span class="pf-spin" aria-hidden="true"></span>Painting this page…</div>';
     else if (errs[slot]) pic = '<div class="pf-wait bad">' + esc(errs[slot]) + "</div>";
     else pic = '<div class="pf-wait">Waiting to be painted</div>';
-    var ctl = "";
+    var ctl = "", form = "", reported = st.paint && (st.paint.issues || []).indexOf(slot) >= 0;
     if (!st.approved && st.paid) {
       if (errs[slot]) ctl = '<button type="button" class="btn ghost btn-sm" data-redo="' + slot + '">Try again</button>';
-      else if (sharp(slot) && !busy[slot]) ctl = '<button type="button" class="btn ghost btn-sm" data-redo="' + slot + '">Paint this page again</button>';
+      else if (sharp(slot) && !busy[slot]) ctl = '<span class="pf-ctl"><button type="button" class="btn ghost btn-sm" data-open="redo-' + slot + '">Paint this page again</button>' +
+        '<button type="button" class="pf-link" data-open="report-' + slot + '">Something wrong?</button></span>';
+      if (open["redo-" + slot] && !busy[slot]) form = '<div class="pf-form"><label for="n-redo-' + slot + '">What should we change? <span class="muted">(optional)</span></label>' +
+        '<textarea id="n-redo-' + slot + '" data-note="redo-' + slot + '" rows="2" maxlength="200" placeholder="For example: Grandma should be inside, looking out of the window">' + esc(notes["redo-" + slot] || "") + "</textarea>" +
+        '<p class="small muted">We paint the page again from our example picture, with your note. The new picture replaces this one.</p>' +
+        '<div class="pf-form-btns"><button type="button" class="btn red btn-sm" data-redo="' + slot + '">Paint it again</button><button type="button" class="pf-link" data-close="redo-' + slot + '">Cancel</button></div></div>';
+      else if (open["report-" + slot]) form = '<div class="pf-form"><label for="n-report-' + slot + '">Tell our team what’s wrong with this page</label>' +
+        '<textarea id="n-report-' + slot + '" data-note="report-' + slot + '" rows="3" maxlength="1000">' + esc(notes["report-" + slot] || "") + "</textarea>" +
+        '<p class="small muted">We’ll fix it for you and email you. Your book won’t be printed until it’s fixed.</p>' +
+        '<div class="pf-form-btns"><button type="button" class="btn red btn-sm" data-report="' + slot + '">Send to our team</button><button type="button" class="pf-link" data-close="report-' + slot + '">Cancel</button></div>' +
+        (sent[slot] ? '<p class="pf-msg" role="status">' + esc(sent[slot]) + "</p>" : "") + "</div>";
+      if (reported) form = '<p class="pf-note">Thanks for telling us. Our team is fixing this page, and your book won’t print until it’s done.</p>' + form;
     }
     return '<figure class="pf-spread"><div class="bv-page bv-spread side-' + p.side + '"><div class="bv-pic">' + pic + "</div>" +
       '<div class="bv-text">' + p.text.split("\n").map(function (l) { return "<p>" + fill(l) + "</p>"; }).join("") + "</div></div>" +
-      "<figcaption><span>Pages " + (4 + i * 2) + " and " + (5 + i * 2) + "</span>" + ctl + "</figcaption></figure>";
+      "<figcaption><span>Pages " + (4 + i * 2) + " and " + (5 + i * 2) + "</span>" + ctl + "</figcaption>" + form + "</figure>";
   }
   function printOn() {
     var t = st.paint && st.paint.printOn;
@@ -103,6 +115,7 @@
     var status;
     if (!st.paid) status = '<div class="pf-bar"><p>We’re waiting for your payment to be confirmed. This page will carry on by itself in a moment.</p></div>';
     else if (st.approved) status = '<div class="pf-bar ok">' + printLine() + "</div>";
+    else if (st.paint && st.paint.held) status = '<div class="pf-bar"><p><b>Thanks for telling us about a problem.</b> Our team is fixing it, and your book won’t be printed until it’s done. We’ll email you when it’s ready to look at again.</p></div>';
     else if (st.paint && st.paint.stuck && n < total) status = '<div class="pf-bar"><p><b>We’ve hit a snag painting your book.</b> Our team has been told and is on it. We’ll email you as soon as your pages are ready, so you don’t need to keep this page open.</p></div>';
     else if (n < total) status = '<div class="pf-bar"><p><span class="pf-spin" aria-hidden="true"></span> ' + (charsDone() ? "We’re painting your book: <b>" + n + " of " + total + "</b> pages ready." : "We’re getting your characters ready for every page.") +
       " This can take up to an hour. <b>You don’t need to keep this page open:</b> we’ll email you when every page is ready.</p>" +
@@ -127,7 +140,20 @@
 
   root.addEventListener("click", function (e) {
     var b = e.target.closest("[data-redo]");
-    if (b) { var s = b.getAttribute("data-redo"); delete errs[s]; queue.push(s); msg = ""; run(); return; }
+    if (b) { var s = b.getAttribute("data-redo"); delete errs[s]; delete open["redo-" + s]; queue.push(s); msg = ""; run(); return; }
+    var o = e.target.closest("[data-open]");
+    if (o) { var k = o.getAttribute("data-open"); open = {}; open[k] = true; paint(); var t = document.getElementById("n-" + k); if (t) t.focus(); return; }
+    var c = e.target.closest("[data-close]");
+    if (c) { delete open[c.getAttribute("data-close")]; paint(); return; }
+    var rp = e.target.closest("[data-report]");
+    if (rp) {
+      var slot = rp.getAttribute("data-report"), text = (notes["report-" + slot] || "").trim();
+      if (text.length < 3) { sent[slot] = "Please tell us what’s wrong first."; paint(); return; }
+      sent[slot] = "Sending…"; paint();
+      req("POST", "/issues", { slot: slot, note: text }).then(function (j) { st = j; delete sent[slot]; delete open["report-" + slot]; delete notes["report-" + slot]; paint(); },
+        function (e2) { sent[slot] = e2.message; paint(); });
+      return;
+    }
     if (e.target.closest(".pf-ok")) {
       if (!allReady() || !sure) return;
       msg = "Sending your book to print…"; paint();
@@ -135,6 +161,7 @@
         function (e2) { msg = e2.message; paint(); });
     }
   });
+  root.addEventListener("input", function (e) { var k = e.target.getAttribute && e.target.getAttribute("data-note"); if (k) notes[k] = e.target.value; });
   root.addEventListener("change", function (e) { if (e.target.id === "pf-sure") { sure = e.target.checked; paint(); } });
 
   function load() {
