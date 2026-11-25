@@ -507,6 +507,13 @@ textarea { min-height: 90px; resize: vertical; }
 .pf-spread figcaption { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; font-weight: 600; color: var(--muted); }
 .pf-wait { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; padding: 16px; background: var(--surface-2); color: var(--muted); font-weight: 600; }
 .pf-wait.bad { color: #B3261E; }
+.pf-ctl { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pf-link { background: none; border: 0; padding: 4px 0; font: inherit; font-weight: 600; color: var(--muted); text-decoration: underline; cursor: pointer; }
+.pf-form { display: grid; gap: 8px; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.pf-form label { font-weight: 600; } .pf-form p { margin: 0; }
+.pf-form textarea { width: 100%; box-sizing: border-box; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; resize: vertical; }
+.pf-form-btns { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.pf-note { margin: 0; padding: 10px 14px; border-radius: 10px; background: #FFF4E5; font-weight: 600; }
 .pf-approve { display: grid; gap: 14px; justify-items: start; padding: 22px; border-radius: var(--r); background: var(--surface); border: 1px solid var(--line); }
 .pf-msg { margin: 0; font-weight: 600; }
 .pf-printing { margin: 0; } .pf-printing a { margin-left: 6px; }
